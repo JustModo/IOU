@@ -1,8 +1,8 @@
 import React from "react";
 import { Tabs } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import "../global.css";
+import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
   return (
@@ -23,7 +23,6 @@ export default function RootLayout() {
           tabBarInactiveTintColor: "#aaa",
         }}
       >
-        <Tabs.Screen name="index" options={{ href: null }} />
         <Tabs.Screen
           name="iou"
           options={{
@@ -67,6 +66,7 @@ export default function RootLayout() {
             },
           }}
         />
+        <Tabs.Screen name="index" options={{ href: null }} />
       </Tabs>
     </>
   );
