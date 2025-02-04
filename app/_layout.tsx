@@ -1,39 +1,73 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import React from "react";
+import { Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import "../global.css";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <>
+      <StatusBar />
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: {
+            backgroundColor: "#121317",
+            borderColor: "#1E1E1E",
+            height: 65,
+          },
+          tabBarLabelStyle: {
+            fontSize: 14,
+          },
+          tabBarActiveTintColor: "#fff",
+          tabBarInactiveTintColor: "#aaa",
+        }}
+      >
+        <Tabs.Screen name="index" options={{ href: null }} />
+        <Tabs.Screen
+          name="iou"
+          options={{
+            title: "IOU",
+            tabBarIcon: ({ focused, color, size }) => {
+              return (
+                <MaterialCommunityIcons
+                  name="cash-multiple"
+                  size={size}
+                  color={color}
+                />
+              );
+            },
+          }}
+        />
+        <Tabs.Screen
+          name="bill"
+          options={{
+            headerShown: false,
+            title: "Bills",
+            tabBarIcon: ({ focused, color, size }) => {
+              return (
+                <MaterialCommunityIcons
+                  name="format-page-split"
+                  size={size}
+                  color={color}
+                />
+              );
+            },
+          }}
+        />
+        <Tabs.Screen
+          name="more"
+          options={{
+            headerShown: false,
+            title: "More",
+            tabBarIcon: ({ focused, color, size }) => {
+              return (
+                <Feather name="more-horizontal" size={size} color={color} />
+              );
+            },
+          }}
+        />
+      </Tabs>
+    </>
   );
 }
