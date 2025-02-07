@@ -14,7 +14,7 @@ export default function IOU() {
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-black">
-      <IOUTitleBar text="IOU" />
+      <IOUTitleBar />
 
       <ScrollView
         className="flex-1"

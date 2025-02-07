@@ -1,8 +1,14 @@
 import React, { useState } from "react";
-import { Text, View, TextInput, Pressable } from "react-native";
+import {
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 
-export default function IOUTitleBar({ text = "" }) {
+export default function IOUTitleBar() {
   const [searchActive, setSearchActive] = useState(false);
   const [searchText, setSearchText] = useState("");
 
@@ -18,7 +24,9 @@ export default function IOUTitleBar({ text = "" }) {
           autoFocus
         />
       ) : (
-        <Text className="text-white text-xl flex-1 py-2">{text}</Text>
+        <Text className="text-white text-xl font-semibold flex-1 py-2">
+          {"IOU"}
+        </Text>
       )}
 
       <Pressable
@@ -35,9 +43,9 @@ export default function IOUTitleBar({ text = "" }) {
         />
       </Pressable>
 
-      <Pressable onPress={() => {}} className="ml-6">
+      <TouchableOpacity onPress={() => {}} className="ml-6">
         <AntDesign name="adduser" size={24} color="white" />
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 }
