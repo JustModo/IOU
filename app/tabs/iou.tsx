@@ -3,8 +3,9 @@ import { useDB } from "@/hooks/useDB";
 // import { useEffect } from "react";
 import { ScrollView, Text, View, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 
-export default function IOUHome() {
+export default function IOU() {
   const { users, addUser, deleteUser } = useDB();
 
   // useEffect(() => {
@@ -19,22 +20,20 @@ export default function IOUHome() {
         className="flex-1"
         contentContainerStyle={{ paddingVertical: 20 }}
       >
-        <UserTab />
-        <UserTab />
-        <UserTab />
-
-        <UserTab />
+        <UserTab id="hi" />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function UserTab() {
+function UserTab({ id }: { id: string }) {
+  const router = useRouter();
+
   return (
     <TouchableOpacity
       className="w-screen flex-row items-center"
       activeOpacity={0.7}
-      onPress={() => console.log("Pressed!")}
+      onPress={() => router.push(`/stack/user/${id}`)}
     >
       {/* Left Side (Avatar + Name) */}
       <View className="flex-row items-center gap-4 py-2 pl-4 flex-1">
