@@ -1,20 +1,19 @@
+import IOUTitleBar from "@/components/IOUTitleBar";
 import { useDB } from "@/hooks/useDB";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 import { ScrollView, Text, View, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function IOUHome() {
   const { users, addUser, deleteUser } = useDB();
 
-  useEffect(() => {
-    console.log(users);
-  }, [users]);
+  // useEffect(() => {
+  //   console.log(users);
+  // }, [users]);
 
   return (
-    <SafeAreaView className="flex-1 justify-center items-center bg-[#010409]">
-      <View className="w-screen h-16 bg-[#121317] justify-center">
-        <Text className="text-white px-8 text-xl">IOU</Text>
-      </View>
+    <SafeAreaView className="flex-1 justify-center items-center bg-black">
+      <IOUTitleBar text="IOU" />
 
       <ScrollView
         className="flex-1"

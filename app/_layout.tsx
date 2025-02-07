@@ -1,13 +1,13 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
-import "../global.css";
 import { StatusBar } from "expo-status-bar";
+import "../global.css";
 
 export default function RootLayout() {
   return (
     <>
-      <StatusBar />
+      <StatusBar style="light" translucent />
       <Tabs
         screenOptions={{
           headerShown: false,
