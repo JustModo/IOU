@@ -8,6 +8,7 @@ import {
   GestureHandlerRootView,
   ScrollView,
 } from "react-native-gesture-handler";
+import { Status } from "@/types/utils";
 
 export default function UserScreen() {
   const { id } = useLocalSearchParams();
@@ -25,8 +26,6 @@ export default function UserScreen() {
     ],
   };
 
-  type Status = "negative" | "positive" | "neutral";
-
   const status: Status =
     data.amount > 0 ? "positive" : data.amount < 0 ? "negative" : "neutral";
 
@@ -34,7 +33,10 @@ export default function UserScreen() {
     <SafeAreaView className="bg-black flex-1">
       {/* Header */}
       <View className="w-full h-16 bg-[#121317] flex-row items-center px-6 justify-between">
-        <TouchableOpacity onPress={() => router.back()} className="flex-row items-center gap-2">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="flex-row items-center gap-2"
+        >
           <AntDesign name="left" size={24} color="white" />
           <Text className="text-white font-semibold text-lg">Back</Text>
         </TouchableOpacity>

@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { db } from "../db";
 import { usersTable } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { User } from "@/types/user";
 
 // Custom Hook for Database Operations
 export function useDB() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   // Fetch all users
   const fetchUsers = async () => {
@@ -18,10 +19,12 @@ export function useDB() {
   };
 
   // Insert a new user
-  const addUser = async (name: string, amount: number, pfp: string) => {
+  const addUser = async (name: string, pfp: string | null) => {
+    const amount = 0;
     try {
       await db.insert(usersTable).values({ name, amount, pfp }).run();
       fetchUsers();
+      return name;
     } catch (error) {
       console.error("Error inserting user:", error);
     }

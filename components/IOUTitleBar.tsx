@@ -7,10 +7,13 @@ import {
   Pressable,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 export default function IOUTitleBar() {
   const [searchActive, setSearchActive] = useState(false);
   const [searchText, setSearchText] = useState("");
+
+  const router = useRouter();
 
   return (
     <View className="w-screen h-16 bg-[#121317] flex-row items-center px-6">
@@ -43,7 +46,10 @@ export default function IOUTitleBar() {
         />
       </Pressable>
 
-      <TouchableOpacity onPress={() => {}} className="ml-6">
+      <TouchableOpacity
+        onPress={() => router.push("/stack/user/adduser")}
+        className="ml-6"
+      >
         <AntDesign name="adduser" size={24} color="white" />
       </TouchableOpacity>
     </View>
