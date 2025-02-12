@@ -1,0 +1,2 @@
+ALTER TABLE `bill_transactions` ADD `bill_id` integer NOT NULL REFERENCES bill_table(id);--> statement-breakpoint
+ALTER TABLE `iou_transactions` ADD `user_id` integer NOT NULL REFERENCES users_table(id);

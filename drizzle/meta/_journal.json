@@ -8,6 +8,20 @@
       "when": 1738671349663,
       "tag": "0000_wakeful_wraith",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1739382669328,
+      "tag": "0001_majestic_paladin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1739383398434,
+      "tag": "0002_motionless_marvex",
+      "breakpoints": true
     }
   ]
 }
