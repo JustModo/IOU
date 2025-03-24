@@ -1,30 +1,45 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
-import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  AntDesign,
+  Feather,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TransactionTab from "@/components/TransactionTab";
 import {
   GestureHandlerRootView,
   ScrollView,
 } from "react-native-gesture-handler";
+import { useDB } from "@/hooks/useDB";
 import { Status } from "@/types/utils";
+import { User } from "@/types/user";
+import { IOUTransaction } from "@/types/transaction";
 
 export default function UserScreen() {
-  const { id } = useLocalSearchParams();
   const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const { users, fetchTransactionsByID } = useDB();
 
-  const data = {
-    id: 123,
-    name: "John Doe",
-    amount: 1203,
-    transactions: [
-      { id: 1, title: "Hola1", time: new Date().toUTCString(), amount: 123 },
-      { id: 2, title: "Hola2", time: new Date().toUTCString(), amount: -123 },
-      { id: 3, title: "Hola3", time: new Date().toUTCString(), amount: 0 },
-      { id: 4, title: "Hola4", time: new Date().toUTCString(), amount: 1283 },
-    ],
-  };
+  const [data, setData] = useState<User | null>(null);
+  const [transactions, setTransactions] = useState<IOUTransaction[] | null>(
+    null
+  );
+
+  useEffect(() => {
+    if (!id || !users.length) return;
+
+    const userData = users.find((user) => user.id === Number(id)) || null;
+    setData(userData);
+
+    if (id && !Array.isArray(id)) {
+      fetchTransactionsByID(Number(id)).then(setTransactions);
+    }
+  }, [id, users]);
+
+  if (!data) return null;
 
   const status: Status =
     data.amount > 0 ? "positive" : data.amount < 0 ? "negative" : "neutral";
@@ -51,7 +66,13 @@ export default function UserScreen() {
 
       {/* Profile Section */}
       <View className="p-4 py-8 flex-row items-center">
-        <View className="bg-slate-500 h-28 w-28 rounded-full" />
+        <View className="bg-[#121317] h-28 w-28 rounded-full overflow-hidden justify-center items-center">
+          {data.pfp ? (
+            <Image source={{ uri: data.pfp }} className="w-full h-full" />
+          ) : (
+            <Ionicons name="person-sharp" color="gray" size={42} />
+          )}
+        </View>
 
         <View className="flex-1 items-end justify-end">
           <Text
@@ -84,7 +105,7 @@ export default function UserScreen() {
       {/* Scrollable Content */}
       <GestureHandlerRootView>
         <ScrollView className="flex-1">
-          {data.transactions.map((transaction) => (
+          {transactions?.reverse().map((transaction) => (
             <TransactionTab key={transaction.id} transaction={transaction} />
           ))}
         </ScrollView>
@@ -92,15 +113,39 @@ export default function UserScreen() {
 
       {/* Bottom Button Section */}
       <View className="w-full bg-[#121317] flex-row justify-between overflow-visible h-14 items-end rounded-2xl">
-        <TouchableOpacity className="flex-1 h-full justify-center">
+        <TouchableOpacity
+          className="flex-1 h-full justify-center"
+          onPress={() =>
+            router.push({
+              pathname: `/stack/transaction/addtransaction`,
+              params: { type: "oweme", id: data.id },
+            })
+          }
+        >
           <Text className="text-white text-center text-lg font-semibold">
             Owes Me
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity className="w-20 h-16 bg-[#1e1f23] justify-center items-center rounded-t-xl">
+        <TouchableOpacity
+          className="w-20 h-16 bg-[#1e1f23] justify-center items-center rounded-t-xl"
+          onPress={() =>
+            router.push({
+              pathname: `/stack/transaction/addtransaction`,
+              params: { type: "repay", id: data.id },
+            })
+          }
+        >
           <MaterialCommunityIcons name="cash-plus" size={32} color="white" />
         </TouchableOpacity>
-        <TouchableOpacity className="flex-1 h-full justify-center">
+        <TouchableOpacity
+          className="flex-1 h-full justify-center"
+          onPress={() =>
+            router.push({
+              pathname: `/stack/transaction/addtransaction`,
+              params: { type: "oweyou", id: data.id },
+            })
+          }
+        >
           <Text className="text-white text-center text-lg font-semibold">
             Owe You
           </Text>

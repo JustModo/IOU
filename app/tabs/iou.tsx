@@ -8,9 +8,9 @@ import UserTab from "@/components/UserTab";
 export default function IOU() {
   const { users } = useDB();
 
-  useEffect(() => {
-    console.log(users);
-  }, [users]);
+  // useEffect(() => {
+  //   console.log(users);
+  // }, [users]);
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-black">

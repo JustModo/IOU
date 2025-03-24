@@ -6,16 +6,10 @@ import {
   State,
 } from "react-native-gesture-handler";
 import { useRef } from "react";
-
-type Transaction = {
-  id: number;
-  title: string;
-  time: string;
-  amount: number;
-};
+import { IOUTransaction } from "@/types/transaction";
 
 type TransactionTabProps = {
-  transaction: Transaction;
+  transaction: IOUTransaction;
 };
 
 export default function TransactionTab({ transaction }: TransactionTabProps) {
@@ -55,6 +49,23 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
     extrapolate: "clamp",
   });
 
+  const formatToUTC = (isoString: string): string => {
+    const date = new Date(isoString);
+
+    const day = date.getUTCDate().toString().padStart(2, "0");
+    const month = date.toLocaleString("en-US", {
+      month: "long",
+      timeZone: "UTC",
+    });
+    const year = date.getUTCFullYear();
+
+    const hours = date.getUTCHours() % 12 || 12;
+    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+    const ampm = date.getUTCHours() >= 12 ? "PM" : "AM";
+
+    return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+  };
+
   return (
     <PanGestureHandler
       activeOffsetX={[-20, 20]} // Ignore small horizontal swipes
@@ -77,14 +88,16 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
             padding: 16,
             flexDirection: "row",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "flex-start",
             borderRadius: 10,
             overflow: "hidden",
           }}
         >
-          <View>
-            <Text className="text-lg text-white">{transaction.title}</Text>
-            <Text className="text-sm text-[#aaa]">{transaction.time}</Text>
+          <View className="max-w-[80%]">
+            <Text className="text-lg text-white">{transaction.note}</Text>
+            <Text className="text-sm text-[#aaa]">
+              {formatToUTC(transaction.date)}
+            </Text>
           </View>
           <Text className="text-white font-light text-2xl">
             {`${

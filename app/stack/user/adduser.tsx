@@ -8,7 +8,7 @@ import { useDB } from "@/hooks/useDB";
 
 export default function adduser() {
   const router = useRouter();
-  const { addUser } = useDB();
+  const { insertUser } = useDB();
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [name, setName] = useState<string>("");
@@ -34,7 +34,7 @@ export default function adduser() {
 
   const handleSave = async () => {
     const trimmed = name.trim();
-    const res = await addUser(trimmed, selectedImage);
+    const res = await insertUser(trimmed, selectedImage);
     if (res) router.back();
   };
 
