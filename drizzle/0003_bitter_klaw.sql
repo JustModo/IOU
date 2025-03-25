@@ -1,0 +1,1 @@
+ALTER TABLE `iou_transactions` ADD `type` text NOT NULL;

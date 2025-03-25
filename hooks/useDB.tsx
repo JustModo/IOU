@@ -12,9 +12,10 @@ import {
   billTable,
   billTransactions,
 } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";
+import { TransactionType } from "@/types/utils";
 
 type DBContextType = {
   users: User[];
@@ -24,7 +25,8 @@ type DBContextType = {
   insertIouTransaction: (
     userId: number,
     note: string,
-    amount: number
+    amount: number,
+    type: TransactionType
   ) => Promise<boolean>;
   deleteIouTransaction: (id: number) => Promise<boolean>;
   insertBill: (
@@ -106,21 +108,29 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
   const insertIouTransaction = async (
     userId: number,
     note: string,
-    amount: number
+    amount: number,
+    type: TransactionType
   ): Promise<boolean> => {
     const date = new Date().toISOString();
     try {
-      await db
-        .insert(iouTransactions)
-        .values({ user_id: userId, note, amount, date })
-        .run();
+      await db.transaction(async (tx) => {
+        await tx
+          .insert(iouTransactions)
+          .values({ user_id: userId, note, amount, date, type })
+          .run();
+        await tx
+          .update(usersTable)
+          .set({ amount: sql`${usersTable.amount} + ${amount}` })
+          .where(eq(usersTable.id, userId))
+          .run();
+      });
+      await fetchUsers();
       return true;
     } catch (error) {
       console.error("Error inserting IOU transaction:", error);
       return false;
     }
   };
-
   // Delete IOU transaction
   const deleteIouTransaction = async (id: number): Promise<boolean> => {
     try {

@@ -14,6 +14,7 @@ export const iouTransactions = sqliteTable("iou_transactions", {
     .notNull()
     .references(() => usersTable.id, { onDelete: "cascade" }),
   note: text("note").notNull(),
+  type: text("type").notNull(),
   amount: integer("amount").notNull(),
   date: text("date").notNull(),
 });

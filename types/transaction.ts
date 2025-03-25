@@ -4,4 +4,5 @@ export type IOUTransaction = {
   note: string;
   amount: number;
   date: string;
+  type: string;
 };

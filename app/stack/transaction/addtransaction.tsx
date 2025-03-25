@@ -4,16 +4,37 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDB } from "@/hooks/useDB";
+import { TransactionType } from "@/types/utils";
 
 export default function AddTransaction() {
   const router = useRouter();
-  const { id, type } = useLocalSearchParams();
+  const { id, type } = useLocalSearchParams() as {
+    id: string;
+    type: TransactionType;
+  };
 
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const amountInputRef = useRef<TextInput | null>(null);
 
-  const { insertIouTransaction } = useDB();
+  const { insertIouTransaction, fetchTransactionsByID } = useDB();
+
+  const mapping: Record<TransactionType, { title: string; mul: number }> = {
+    oweme: {
+      title: "You Owe Me",
+      mul: 1,
+    },
+    oweyou: {
+      title: "I Owe You",
+      mul: -1,
+    },
+    repay: {
+      title: "Repay",
+      mul: -1,
+    },
+  };
+
+  const setting = mapping[type];
 
   const handleInsert = async () => {
     if (!id || Array.isArray(id)) {
@@ -22,7 +43,12 @@ export default function AddTransaction() {
     }
     const parsedID = parseInt(id, 10);
     const parsedAmount = amount.trim() === "" ? 0 : parseFloat(amount);
-    const res = await insertIouTransaction(parsedID, note, parsedAmount);
+    const res = await insertIouTransaction(
+      parsedID,
+      note,
+      parsedAmount * setting.mul,
+      type
+    );
     if (res) router.back();
   };
 
@@ -41,7 +67,7 @@ export default function AddTransaction() {
 
       <View className="flex-1 bg-black items-center justify-center px-8 gap-12">
         <Text className="text-white font-light text-6xl text-center">
-          Owes Me
+          {setting.title}
         </Text>
 
         {/* Input Section */}
