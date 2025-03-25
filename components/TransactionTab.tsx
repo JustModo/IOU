@@ -30,7 +30,7 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
   const handleGestureEnd = (event: PanGestureHandlerGestureEvent) => {
     const swipeThreshold = -100;
     if (event.nativeEvent.translationX < swipeThreshold) {
-      console.log("Swiped left!", transaction.id);
+      handleEvent();
       swipeDetected.current = true;
     }
 
@@ -64,6 +64,10 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
     const ampm = date.getUTCHours() >= 12 ? "PM" : "AM";
 
     return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+  };
+
+  const handleEvent = () => {
+    console.log("Swiped left!", transaction.id);
   };
 
   return (

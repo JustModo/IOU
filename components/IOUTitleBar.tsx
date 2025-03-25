@@ -9,9 +9,16 @@ import {
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-export default function IOUTitleBar() {
+interface IOUTitleBarProps {
+  searchText: string;
+  setSearchText: (text: string) => void;
+}
+
+export default function IOUTitleBar({
+  searchText,
+  setSearchText,
+}: IOUTitleBarProps) {
   const [searchActive, setSearchActive] = useState(false);
-  const [searchText, setSearchText] = useState("");
 
   const router = useRouter();
 
