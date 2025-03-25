@@ -17,7 +17,7 @@ export default function AddTransaction() {
   const [note, setNote] = useState("");
   const amountInputRef = useRef<TextInput | null>(null);
 
-  const { insertIouTransaction, fetchTransactionsByID } = useDB();
+  const { insertIouTransaction } = useDB();
 
   const mapping: Record<TransactionType, { title: string; mul: number }> = {
     oweme: {
@@ -85,25 +85,22 @@ export default function AddTransaction() {
               onChangeText={(text) => {
                 if (/^\d*\.?\d{0,5}$/.test(text) && !/^0\d/.test(text)) {
                   setAmount(text);
-                  setTimeout(() => {
-                    if (amountInputRef.current) {
-                      amountInputRef.current.setSelection(
-                        text.length,
-                        text.length
-                      );
-                    }
-                  }, 0);
+
+                  requestAnimationFrame(() => {
+                    amountInputRef.current?.setSelection(
+                      text.length,
+                      text.length
+                    );
+                  });
                 }
               }}
               onFocus={() => {
-                setTimeout(() => {
-                  if (amountInputRef.current) {
-                    amountInputRef.current.setSelection(
-                      amount.length,
-                      amount.length
-                    );
-                  }
-                }, 0);
+                requestAnimationFrame(() => {
+                  amountInputRef.current?.setSelection(
+                    amount.length,
+                    amount.length
+                  );
+                });
               }}
               value={amount}
             />

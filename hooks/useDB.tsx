@@ -28,6 +28,13 @@ type DBContextType = {
     amount: number,
     type: TransactionType
   ) => Promise<boolean>;
+  updateIouTransaction: (
+    transactionId: number,
+    userId: number,
+    note: string,
+    newAmount: number,
+    type: TransactionType
+  ) => Promise<boolean>;
   deleteIouTransaction: (id: number) => Promise<boolean>;
   insertBill: (
     title: string,
@@ -131,6 +138,55 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
       return false;
     }
   };
+
+  // Update IOU transation
+  const updateIouTransaction = async (
+    transactionId: number,
+    userId: number,
+    note: string,
+    newAmount: number,
+    type: TransactionType
+  ): Promise<boolean> => {
+    const date = new Date().toISOString();
+
+    try {
+      await db.transaction(async (tx) => {
+        // Get the existing transaction
+        const existingTransaction = await tx
+          .select()
+          .from(iouTransactions)
+          .where(eq(iouTransactions.id, transactionId))
+          .get();
+
+        if (!existingTransaction) {
+          throw new Error("Transaction not found");
+        }
+
+        const oldAmount = existingTransaction.amount;
+        const amountDifference = newAmount - oldAmount;
+
+        // Update the transaction
+        await tx
+          .update(iouTransactions)
+          .set({ note, amount: newAmount, date, type })
+          .where(eq(iouTransactions.id, transactionId))
+          .run();
+
+        // Update the user's balance by adjusting with the difference
+        await tx
+          .update(usersTable)
+          .set({ amount: sql`${usersTable.amount} + ${amountDifference}` })
+          .where(eq(usersTable.id, userId))
+          .run();
+      });
+
+      await fetchUsers();
+      return true;
+    } catch (error) {
+      console.error("Error updating IOU transaction:", error);
+      return false;
+    }
+  };
   // Delete IOU transaction
   const deleteIouTransaction = async (id: number): Promise<boolean> => {
     try {
@@ -216,6 +272,7 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
         insertUser,
         deleteUser,
         insertIouTransaction,
+        updateIouTransaction,
         deleteIouTransaction,
         insertBill,
         deleteBill,
