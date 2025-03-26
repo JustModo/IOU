@@ -70,7 +70,7 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
 
   const handleEvent = () => {
     router.push({
-      pathname: `/stack/transaction/addtransaction`,
+      pathname: `/stack/transaction/transactionform`,
       params: { id: transaction.user_id, mode: "update", transaction:JSON.stringify(transaction) },
     });
   };

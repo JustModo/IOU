@@ -22,6 +22,11 @@ type DBContextType = {
   fetchUsers: () => Promise<void>;
   insertUser: (name: string, pfp: string | null) => Promise<boolean>;
   deleteUser: (id: number) => Promise<boolean>;
+  updateUser: (
+    id: number,
+    name: string,
+    pfp: string | null
+  ) => Promise<boolean>;
   insertIouTransaction: (
     userId: number,
     note: string,
@@ -30,7 +35,6 @@ type DBContextType = {
   ) => Promise<boolean>;
   updateIouTransaction: (
     transactionId: number,
-    userId: number,
     note: string,
     newAmount: number,
     type: TransactionType
@@ -99,6 +103,25 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateUser = async (
+    id: number,
+    name: string,
+    pfp: string | null
+  ): Promise<boolean> => {
+    try {
+      await db
+        .update(usersTable)
+        .set({ name, pfp })
+        .where(eq(usersTable.id, id))
+        .run();
+      await fetchUsers();
+      return true;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return false;
+    }
+  };
+
   // Delete user
   const deleteUser = async (id: number): Promise<boolean> => {
     try {
@@ -135,7 +158,6 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
   // Update IOU transation
   const updateIouTransaction = async (
     transactionId: number,
-    userId: number,
     note: string,
     newAmount: number,
     type: TransactionType
@@ -236,6 +258,7 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
         users,
         fetchUsers,
         insertUser,
+        updateUser,
         deleteUser,
         insertIouTransaction,
         updateIouTransaction,

@@ -54,7 +54,12 @@ export default function IOUTitleBar({
       </Pressable>
 
       <TouchableOpacity
-        onPress={() => router.push("/stack/user/adduser")}
+        onPress={() =>
+          router.push({
+            pathname: "/stack/user/userform",
+            params: { mode: "insert" },
+          })
+        }
         className="ml-6"
       >
         <AntDesign name="adduser" size={24} color="white" />

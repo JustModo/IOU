@@ -78,7 +78,6 @@ export default function AddTransaction() {
     const updatedNote = selectedType === "repay" ? "Repaid" : note;
     const res = await updateIouTransaction(
       transactionId,
-      parsedID,
       updatedNote,
       normalAmount,
       selectedType

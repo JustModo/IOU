@@ -56,9 +56,12 @@ export default function UserScreen() {
           <Text className="text-white font-semibold text-lg">Back</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => {
-            console.log("Hello", id);
-          }}
+          onPress={() =>
+            router.push({
+              pathname: "/stack/user/userform",
+              params: { mode: "update", user: JSON.stringify(data) },
+            })
+          }
         >
           <Feather name="edit-2" size={22} color="white" />
         </TouchableOpacity>
@@ -117,7 +120,7 @@ export default function UserScreen() {
           className="flex-1 h-full justify-center"
           onPress={() =>
             router.push({
-              pathname: `/stack/transaction/addtransaction`,
+              pathname: `/stack/transaction/transactionform`,
               params: { type: "oweme", id: data.id, mode: "insert" },
             })
           }
@@ -130,7 +133,7 @@ export default function UserScreen() {
           className="w-20 h-16 bg-[#1e1f23] justify-center items-center rounded-t-xl"
           onPress={() =>
             router.push({
-              pathname: `/stack/transaction/addtransaction`,
+              pathname: `/stack/transaction/transactionform`,
               params: { type: "repay", id: data.id, mode: "insert" },
             })
           }
@@ -141,7 +144,7 @@ export default function UserScreen() {
           className="flex-1 h-full justify-center"
           onPress={() =>
             router.push({
-              pathname: `/stack/transaction/addtransaction`,
+              pathname: `/stack/transaction/transactionform`,
               params: { type: "oweyou", id: data.id, mode: "insert" },
             })
           }
