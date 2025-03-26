@@ -4,17 +4,20 @@ import { View, Text } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useDBMigrations } from "../db";
 import { useRouter } from "expo-router";
+import { useDB } from "@/hooks/useDB";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Index() {
   const { success, error } = useDBMigrations();
+  const { loadedRef } = useDB();
   const router = useRouter();
 
   useEffect(() => {
     async function prepare() {
       if (success) {
         await SplashScreen.hideAsync();
+        loadedRef.current = true;
         router.push("/tabs/iou");
       }
     }
