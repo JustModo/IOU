@@ -118,7 +118,7 @@ export default function UserScreen() {
           onPress={() =>
             router.push({
               pathname: `/stack/transaction/addtransaction`,
-              params: { type: "oweme", id: data.id },
+              params: { type: "oweme", id: data.id, mode: "insert" },
             })
           }
         >
@@ -131,7 +131,7 @@ export default function UserScreen() {
           onPress={() =>
             router.push({
               pathname: `/stack/transaction/addtransaction`,
-              params: { type: "repay", id: data.id },
+              params: { type: "repay", id: data.id, mode: "insert" },
             })
           }
         >
@@ -142,7 +142,7 @@ export default function UserScreen() {
           onPress={() =>
             router.push({
               pathname: `/stack/transaction/addtransaction`,
-              params: { type: "oweyou", id: data.id },
+              params: { type: "oweyou", id: data.id, mode: "insert" },
             })
           }
         >

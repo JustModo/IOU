@@ -7,12 +7,14 @@ import {
 } from "react-native-gesture-handler";
 import { useRef } from "react";
 import { IOUTransaction } from "@/types/transaction";
+import { useRouter } from "expo-router";
 
 type TransactionTabProps = {
   transaction: IOUTransaction;
 };
 
 export default function TransactionTab({ transaction }: TransactionTabProps) {
+  const router = useRouter();
   const translateX = useRef(new Animated.Value(0)).current;
   const swipeDetected = useRef(false);
 
@@ -67,7 +69,10 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
   };
 
   const handleEvent = () => {
-    console.log("Swiped left!", transaction.id);
+    router.push({
+      pathname: `/stack/transaction/addtransaction`,
+      params: { id: transaction.user_id, mode: "update", transaction:JSON.stringify(transaction) },
+    });
   };
 
   return (
