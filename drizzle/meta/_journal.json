@@ -29,6 +29,13 @@
       "when": 1742922720489,
       "tag": "0003_bitter_klaw",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1742995563425,
+      "tag": "0004_lowly_orphan",
+      "breakpoints": true
     }
   ]
 }

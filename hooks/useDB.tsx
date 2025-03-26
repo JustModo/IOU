@@ -120,17 +120,10 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
   ): Promise<boolean> => {
     const date = new Date().toISOString();
     try {
-      await db.transaction(async (tx) => {
-        await tx
-          .insert(iouTransactions)
-          .values({ user_id: userId, note, amount, date, type })
-          .run();
-        await tx
-          .update(usersTable)
-          .set({ amount: sql`${usersTable.amount} + ${amount}` })
-          .where(eq(usersTable.id, userId))
-          .run();
-      });
+      await db
+        .insert(iouTransactions)
+        .values({ user_id: userId, note, amount, date, type })
+        .run();
       await fetchUsers();
       return true;
     } catch (error) {
@@ -147,39 +140,12 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
     newAmount: number,
     type: TransactionType
   ): Promise<boolean> => {
-    const date = new Date().toISOString();
-
     try {
-      await db.transaction(async (tx) => {
-        // Get the existing transaction
-        const existingTransaction = await tx
-          .select()
-          .from(iouTransactions)
-          .where(eq(iouTransactions.id, transactionId))
-          .get();
-
-        if (!existingTransaction) {
-          throw new Error("Transaction not found");
-        }
-
-        const oldAmount = existingTransaction.amount;
-        const amountDifference = newAmount - oldAmount;
-
-        // Update the transaction
-        await tx
-          .update(iouTransactions)
-          .set({ note, amount: newAmount, date, type })
-          .where(eq(iouTransactions.id, transactionId))
-          .run();
-
-        // Update the user's balance by adjusting with the difference
-        await tx
-          .update(usersTable)
-          .set({ amount: sql`${usersTable.amount} + ${amountDifference}` })
-          .where(eq(usersTable.id, userId))
-          .run();
-      });
-
+      await db
+        .update(iouTransactions)
+        .set({ note, amount: newAmount, type })
+        .where(eq(iouTransactions.id, transactionId))
+        .run();
       await fetchUsers();
       return true;
     } catch (error) {
