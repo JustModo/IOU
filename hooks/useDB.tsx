@@ -4,8 +4,8 @@ import {
   createContext,
   ReactNode,
   useContext,
-  useRef,
-  MutableRefObject,
+  SetStateAction,
+  Dispatch,
 } from "react";
 import { db } from "../db";
 import {
@@ -21,7 +21,7 @@ import { TransactionType } from "@/types/utils";
 
 type DBContextType = {
   users: User[];
-  loadedRef: MutableRefObject<boolean>;
+  setLoaded: Dispatch<SetStateAction<boolean>>;
   fetchUsers: () => Promise<void>;
   insertUser: (name: string, pfp: string | null) => Promise<boolean>;
   deleteUser: (id: number) => Promise<boolean>;
@@ -63,12 +63,12 @@ const DBContext = createContext<DBContextType | undefined>(undefined);
 
 export const DBProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
-  const loadedRef = useRef(false);
+  const [loaded, setLoaded] = useState(false);
 
   // Fetch users
   const fetchUsers = async (): Promise<void> => {
     try {
-      if (!loadedRef.current) return;
+      if (!loaded) return;
       const result: User[] = await db.select().from(usersTable).all();
       setUsers(result);
     } catch (error) {
@@ -254,14 +254,15 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    if (!loaded) return;
     fetchUsers();
-  }, []);
+  }, [loaded]);
 
   return (
     <DBContext.Provider
       value={{
         users,
-        loadedRef,
+        setLoaded,
         fetchUsers,
         insertUser,
         updateUser,
