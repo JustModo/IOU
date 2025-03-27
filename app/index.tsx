@@ -18,7 +18,7 @@ export default function Index() {
       if (success) {
         await SplashScreen.hideAsync();
         setLoaded(true);
-        router.push("/tabs/iou");
+        router.replace("/tabs/iou");
       }
     }
     prepare();
@@ -31,4 +31,5 @@ export default function Index() {
       </View>
     );
   }
+  return <View className="bg-black flex-1" />;
 }

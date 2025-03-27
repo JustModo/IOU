@@ -9,9 +9,13 @@ export default function RootLayout() {
 
   return (
     <DBProvider>
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",
+        }}
+      >
         <Stack.Screen name="tabs" />
-        <Stack.Screen name="stack/user/[id]" />
       </Stack>
     </DBProvider>
   );

@@ -8,6 +8,7 @@ import {
 import { useRef } from "react";
 import { IOUTransaction } from "@/types/transaction";
 import { useRouter } from "expo-router";
+import { Status } from "@/types/utils";
 
 type TransactionTabProps = {
   transaction: IOUTransaction;
@@ -71,9 +72,16 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
   const handleEvent = () => {
     router.push({
       pathname: `/stack/transaction/transactionform`,
-      params: { id: transaction.user_id, mode: "update", transaction:JSON.stringify(transaction) },
+      params: {
+        id: transaction.user_id,
+        mode: "update",
+        transaction: JSON.stringify(transaction),
+      },
     });
   };
+
+   const status: Status =
+      transaction.amount > 0 ? "positive" : transaction.amount < 0 ? "negative" : "neutral";
 
   return (
     <PanGestureHandler
@@ -103,12 +111,22 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
           }}
         >
           <View className="max-w-[80%]">
-            <Text className="text-lg text-white">{transaction.note}</Text>
+            <Text className="text-lg text-white">
+              {transaction.note != "" ? transaction.note : "Note"}
+            </Text>
             <Text className="text-sm text-[#aaa]">
               {formatToUTC(transaction.date)}
             </Text>
           </View>
-          <Text className="text-white font-light text-2xl">
+          <Text
+            className={`font-light text-2xl ${
+              status === "positive"
+                ? "text-green-500"
+                : status === "negative"
+                ? "text-red-500"
+                : "text-[#aaa]"
+            }`}
+          >
             {`${
               transaction.amount > 0 ? "+" : transaction.amount < 0 ? "-" : ""
             } ${Math.abs(transaction.amount)}`}
