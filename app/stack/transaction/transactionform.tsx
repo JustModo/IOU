@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropDownPicker from "react-native-dropdown-picker";
-import { useDB } from "@/hooks/useDB";
+import { useDB } from "@/context/DBContext";
 import { TransactionType } from "@/types/utils";
 import { IOUTransaction } from "@/types/transaction";
 

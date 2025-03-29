@@ -1,5 +1,5 @@
 import TitleBar from "@/components/TitleBar";
-import { useDB } from "@/hooks/useDB";
+import { useDB } from "@/context/DBContext";
 import { useEffect, useState } from "react";
 import { ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,7 +9,7 @@ import { useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 
 export default function IOU() {
-  const { users } = useDB();
+  const { users, fetchUsers } = useDB();
   const router = useRouter();
 
   const [searchText, setSearchText] = useState("");
@@ -28,6 +28,7 @@ export default function IOU() {
         )
     );
   }, [searchText, users]);
+
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-black">

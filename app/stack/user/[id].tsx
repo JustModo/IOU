@@ -13,7 +13,7 @@ import {
   GestureHandlerRootView,
   ScrollView,
 } from "react-native-gesture-handler";
-import { useDB } from "@/hooks/useDB";
+import { useDB } from "@/context/DBContext";
 import { Status } from "@/types/utils";
 import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";

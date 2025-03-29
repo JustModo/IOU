@@ -1,5 +1,5 @@
 import TitleBar from "@/components/TitleBar";
-import { useDB } from "@/hooks/useDB";
+import { useDB } from "@/context/DBContext";
 import { useEffect, useState } from "react";
 import { ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

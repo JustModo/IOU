@@ -4,7 +4,7 @@ import { View, Text } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useDBMigrations } from "../db";
 import { useRouter } from "expo-router";
-import { useDB } from "@/hooks/useDB";
+import { useDB } from "@/context/DBContext";
 
 SplashScreen.preventAutoHideAsync();
 

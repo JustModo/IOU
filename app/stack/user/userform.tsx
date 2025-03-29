@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
-import { useDB } from "@/hooks/useDB";
+import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
 import * as FileSystem from "expo-file-system";
 

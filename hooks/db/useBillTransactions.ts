@@ -1,0 +1,41 @@
+import { eq } from "drizzle-orm";
+import { db } from "../../db";
+import { billTransactions } from "../../db/schema";
+
+export const useBillTransactions = (fetchUsers: () => Promise<void>) => {
+  const insertBillTransaction = async (
+    billId: number,
+    user: string,
+    note: string | null,
+    amount: number
+  ): Promise<boolean> => {
+    const date = new Date().toISOString();
+    try {
+      await db
+        .insert(billTransactions)
+        .values({ bill_id: billId, user, note, amount, date })
+        .run();
+      await fetchUsers();
+      return true;
+    } catch (error) {
+      console.error("Error inserting bill transaction:", error);
+      return false;
+    }
+  };
+
+  const deleteBillTransaction = async (id: number): Promise<boolean> => {
+    try {
+      await db
+        .delete(billTransactions)
+        .where(eq(billTransactions.id, id))
+        .run();
+      await fetchUsers();
+      return true;
+    } catch (error) {
+      console.error("Error deleting bill transaction:", error);
+      return false;
+    }
+  };
+
+  return [insertBillTransaction, deleteBillTransaction] as const;
+};

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropDownPicker from "react-native-dropdown-picker";
-import { useDB } from "@/hooks/useDB";
+import { useDB } from "@/context/DBContext";
 
 export default function BillForm() {
   const router = useRouter();
