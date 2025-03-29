@@ -1,13 +1,16 @@
-import IOUTitleBar from "@/components/IOUTitleBar";
+import TitleBar from "@/components/TitleBar";
 import { useDB } from "@/hooks/useDB";
 import { useEffect, useState } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import UserTab from "@/components/UserTab";
 import { User } from "@/types/user";
+import { useRouter } from "expo-router";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function IOU() {
   const { users } = useDB();
+  const router = useRouter();
 
   const [searchText, setSearchText] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -28,7 +31,23 @@ export default function IOU() {
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-black">
-      <IOUTitleBar searchText={searchText} setSearchText={setSearchText} />
+      <TitleBar
+        searchText={searchText}
+        setSearchText={setSearchText}
+        title="IOU"
+      >
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/stack/user/userform",
+              params: { mode: "insert" },
+            })
+          }
+          className="ml-6"
+        >
+          <AntDesign name="adduser" size={24} color="white" />
+        </TouchableOpacity>
+      </TitleBar>
 
       <ScrollView
         className="flex-1"
