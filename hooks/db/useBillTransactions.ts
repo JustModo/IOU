@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../../db";
 import { billTransactions } from "../../db/schema";
 
-export const useBillTransactions = (fetchUsers: () => Promise<void>) => {
+export const useBillTransactions = (fetchAll: () => Promise<void>) => {
   const insertBillTransaction = async (
     billId: number,
     user: string,
@@ -15,7 +15,7 @@ export const useBillTransactions = (fetchUsers: () => Promise<void>) => {
         .insert(billTransactions)
         .values({ bill_id: billId, user, note, amount, date })
         .run();
-      await fetchUsers();
+      await fetchAll();
       return true;
     } catch (error) {
       console.error("Error inserting bill transaction:", error);
@@ -29,7 +29,7 @@ export const useBillTransactions = (fetchUsers: () => Promise<void>) => {
         .delete(billTransactions)
         .where(eq(billTransactions.id, id))
         .run();
-      await fetchUsers();
+      await fetchAll();
       return true;
     } catch (error) {
       console.error("Error deleting bill transaction:", error);

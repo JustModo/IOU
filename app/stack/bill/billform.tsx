@@ -14,15 +14,18 @@ import { useDB } from "@/context/DBContext";
 
 export default function BillForm() {
   const router = useRouter();
-  const { users } = useDB();
+  const { users, insertBill } = useDB();
 
   const [billName, setBillName] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [open, setOpen] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     console.log("Bill Name:", billName);
     console.log("Selected User IDs:", selectedUsers);
+    const userstring = JSON.stringify(selectedUsers);
+    const res = await insertBill(billName, userstring);
+    if (res) router.back();
   };
   return (
     <TouchableWithoutFeedback

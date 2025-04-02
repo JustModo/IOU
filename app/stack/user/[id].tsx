@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import {
@@ -27,19 +27,43 @@ export default function UserScreen() {
   const [transactions, setTransactions] = useState<IOUTransaction[] | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
+
+  const userId = typeof id === "string" ? Number(id) : null;
+
+  const loadData = useCallback(async () => {
+    if (userId === null || !users.length) return;
+
+    setIsLoading(true);
+
+    try {
+      const userData = users.find((user) => user.id === userId) || null;
+      setData(userData);
+      console.log("Here");
+      if (userData) {
+        const transactionData = await fetchTransactionsByID(userId);
+        setTransactions(transactionData);
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId, users, fetchTransactionsByID]);
 
   useEffect(() => {
-    if (!id || !users.length) return;
+    loadData();
+  }, [loadData]);
 
-    const userData = users.find((user) => user.id === Number(id)) || null;
-    setData(userData);
-
-    if (id && !Array.isArray(id)) {
-      fetchTransactionsByID(Number(id)).then(setTransactions);
-    }
-  }, [id, users]);
-
-  if (!data) return null;
+  if (!data) {
+    return (
+      <SafeAreaView className="bg-black flex-1 justify-center items-center">
+        <Text className="text-white text-lg">
+          {isLoading ? "Loading..." : "User not found"}
+        </Text>
+      </SafeAreaView>
+    );
+  }
 
   const status: Status =
     data.amount > 0 ? "positive" : data.amount < 0 ? "negative" : "neutral";
@@ -108,9 +132,24 @@ export default function UserScreen() {
       {/* Scrollable Content */}
       <GestureHandlerRootView>
         <ScrollView className="flex-1">
-          {transactions?.reverse().map((transaction) => (
-            <TransactionTab key={transaction.id} transaction={transaction} />
-          ))}
+          {isLoading ? (
+            <Text className="text-white text-center py-4">
+              Loading transactions...
+            </Text>
+          ) : transactions && transactions.length > 0 ? (
+            [...transactions]
+              .reverse()
+              .map((transaction) => (
+                <TransactionTab
+                  key={transaction.id}
+                  transaction={transaction}
+                />
+              ))
+          ) : (
+            <Text className="text-gray-400 text-center py-4">
+              No transactions found
+            </Text>
+          )}
         </ScrollView>
       </GestureHandlerRootView>
 

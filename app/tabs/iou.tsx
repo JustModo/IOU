@@ -1,7 +1,7 @@
 import TitleBar from "@/components/TitleBar";
 import { useDB } from "@/context/DBContext";
 import { useEffect, useState } from "react";
-import { ScrollView, TouchableOpacity } from "react-native";
+import { ScrollView, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import UserTab from "@/components/UserTab";
 import { User } from "@/types/user";
@@ -9,7 +9,7 @@ import { useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 
 export default function IOU() {
-  const { users, fetchUsers } = useDB();
+  const { users } = useDB();
   const router = useRouter();
 
   const [searchText, setSearchText] = useState("");
@@ -28,7 +28,6 @@ export default function IOU() {
         )
     );
   }, [searchText, users]);
-
 
   return (
     <SafeAreaView className="flex-1 justify-center items-center bg-black">
@@ -54,9 +53,15 @@ export default function IOU() {
         className="flex-1"
         contentContainerStyle={{ paddingVertical: 20 }}
       >
-        {filteredUsers.map((user) => (
-          <UserTab key={user.id} user={user} />
-        ))}
+        {filteredUsers.length > 0 ? (
+          filteredUsers.map((user) => <UserTab key={user.id} user={user} />)
+        ) : (
+          <Text className="text-gray-400 text-center p-4">
+            {users.length === 0
+              ? "No users found. Add your first user!"
+              : "No matching users found."}
+          </Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

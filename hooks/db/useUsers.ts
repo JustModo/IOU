@@ -2,14 +2,14 @@ import { db } from "../../db";
 import { usersTable } from "../../db/schema";
 import { eq } from "drizzle-orm";
 
-export const useUsers = (fetchUsers: () => Promise<void>) => {
+export const useUsers = (fetchAll: () => Promise<void>) => {
   const insertUser = async (
     name: string,
     pfp: string | null
   ): Promise<boolean> => {
     try {
       await db.insert(usersTable).values({ name, amount: 0, pfp }).run();
-      await fetchUsers();
+      await fetchAll();
       return true;
     } catch (error) {
       console.error("Error inserting user:", error);
@@ -28,7 +28,7 @@ export const useUsers = (fetchUsers: () => Promise<void>) => {
         .set({ name, pfp })
         .where(eq(usersTable.id, id))
         .run();
-      await fetchUsers();
+      await fetchAll();
       return true;
     } catch (error) {
       console.error("Error updating user:", error);
@@ -39,7 +39,7 @@ export const useUsers = (fetchUsers: () => Promise<void>) => {
   const deleteUser = async (id: number): Promise<boolean> => {
     try {
       await db.delete(usersTable).where(eq(usersTable.id, id)).run();
-      await fetchUsers();
+      await fetchAll();
       return true;
     } catch (error) {
       console.error("Error deleting user:", error);

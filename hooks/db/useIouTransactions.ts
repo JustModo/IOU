@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { IOUTransaction } from "@/types/transaction";
 import { TransactionType } from "@/types/utils";
 
-export const useIouTransactions = (fetchUsers: () => Promise<void>) => {
+export const useIouTransactions = (fetchAll: () => Promise<void>) => {
   const insertIouTransaction = async (
     userId: number,
     note: string,
@@ -17,7 +17,7 @@ export const useIouTransactions = (fetchUsers: () => Promise<void>) => {
         .insert(iouTransactions)
         .values({ user_id: userId, note, amount, date, type })
         .run();
-      await fetchUsers();
+      await fetchAll();
       return true;
     } catch (error) {
       console.error("Error inserting IOU transaction:", error);
@@ -37,7 +37,7 @@ export const useIouTransactions = (fetchUsers: () => Promise<void>) => {
         .set({ note, amount: newAmount, type })
         .where(eq(iouTransactions.id, transactionId))
         .run();
-      await fetchUsers();
+      await fetchAll();
       return true;
     } catch (error) {
       console.error("Error updating IOU transaction:", error);
@@ -48,7 +48,7 @@ export const useIouTransactions = (fetchUsers: () => Promise<void>) => {
   const deleteIouTransaction = async (id: number): Promise<boolean> => {
     try {
       await db.delete(iouTransactions).where(eq(iouTransactions.id, id)).run();
-      await fetchUsers();
+      await fetchAll();
       return true;
     } catch (error) {
       console.error("Error deleting IOU transaction:", error);
@@ -65,7 +65,6 @@ export const useIouTransactions = (fetchUsers: () => Promise<void>) => {
         .from(iouTransactions)
         .where(eq(iouTransactions.user_id, id))
         .all();
-      await fetchUsers();
       return result;
     } catch (error) {
       console.error("Error fetching transactions:", error);

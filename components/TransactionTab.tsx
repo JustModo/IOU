@@ -80,8 +80,12 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
     });
   };
 
-   const status: Status =
-      transaction.amount > 0 ? "positive" : transaction.amount < 0 ? "negative" : "neutral";
+  const status: Status =
+    transaction.amount > 0
+      ? "positive"
+      : transaction.amount < 0
+      ? "negative"
+      : "neutral";
 
   return (
     <PanGestureHandler
@@ -112,7 +116,7 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
         >
           <View className="max-w-[80%]">
             <Text className="text-lg text-white">
-              {transaction.note != "" ? transaction.note : "Note"}
+              {transaction.note !== "" ? transaction.note : "Note"}
             </Text>
             <Text className="text-sm text-[#aaa]">
               {formatToUTC(transaction.date)}

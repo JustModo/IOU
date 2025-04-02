@@ -10,19 +10,19 @@ SplashScreen.preventAutoHideAsync();
 
 export default function Index() {
   const { success, error } = useDBMigrations();
-  const { setLoaded } = useDB();
   const router = useRouter();
+  const { fetchData } = useDB();
 
   useEffect(() => {
     async function prepare() {
       if (success) {
         await SplashScreen.hideAsync();
-        setLoaded(true);
+        await fetchData();
         router.replace("/tabs/iou");
       }
     }
     prepare();
-  }, [success]);
+  }, [router, success, fetchData]);
 
   if (error) {
     return (

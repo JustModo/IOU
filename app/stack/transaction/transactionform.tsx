@@ -40,7 +40,7 @@ export default function AddTransaction() {
     } else {
       setSelectedType(type);
     }
-  }, [mode, transaction]);
+  }, [mode, transaction, id, type]);
 
   const mapping: Record<TransactionType, { title: string; mul: number }> = {
     oweme: { title: "You Owe Me", mul: 1 },
@@ -72,7 +72,6 @@ export default function AddTransaction() {
       console.error("Invalid ID provided");
       return;
     }
-    const parsedID = parseInt(id, 10);
     const parsedAmount = amount.trim() === "" ? 0 : parseFloat(amount);
     const normalAmount = parsedAmount * setting.mul;
     const updatedNote = selectedType === "repay" ? "Repaid" : note;
@@ -173,7 +172,7 @@ export default function AddTransaction() {
             />
           </View>
 
-          {selectedType != "repay" && (
+          {selectedType !== "repay" && (
             <View className="w-full">
               <Text className="text-white font-semibold mb-2 px-2">Notes</Text>
               <TextInput

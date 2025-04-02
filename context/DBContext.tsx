@@ -16,14 +16,15 @@ import {
   useBills,
   useBillTransactions,
 } from "@/hooks/db";
-import { usersTable } from "@/db/schema";
+import { billTable, usersTable } from "@/db/schema";
 import { db } from "@/db";
+import { Bill } from "@/types/bill";
 
 type DBContextType = {
   users: User[];
+  bills: Bill[];
   setUsers: Dispatch<SetStateAction<User[]>>;
-  setLoaded: Dispatch<SetStateAction<boolean>>;
-  fetchUsers: () => Promise<void>;
+  fetchData: () => Promise<void>;
   insertUser: (name: string, pfp: string | null) => Promise<boolean>;
   updateUser: (
     id: number,
@@ -44,11 +45,7 @@ type DBContextType = {
     type: TransactionType
   ) => Promise<boolean>;
   deleteIouTransaction: (id: number) => Promise<boolean>;
-  insertBill: (
-    title: string,
-    amount: number,
-    users: string
-  ) => Promise<boolean>;
+  insertBill: (title: string, users: string) => Promise<boolean>;
   deleteBill: (id: number) => Promise<boolean>;
   insertBillTransaction: (
     billId: number,
@@ -64,56 +61,50 @@ const DBContext = createContext<DBContextType | undefined>(undefined);
 
 export const DBProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [bills, setBills] = useState<Bill[]>([]);
 
-  const fetchUsers = async (): Promise<void> => {
+  const fetchData = async (): Promise<void> => {
     try {
-      if (!loaded) return;
-      const result: User[] = await db.select().from(usersTable).all();
-      setUsers(result);
+      const fetchedUsers: User[] = await db.select().from(usersTable).all();
+      const fetchedBills: Bill[] = await db.select().from(billTable).all();
+      setUsers(fetchedUsers);
+      setBills(fetchedBills);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching data:", error);
     }
   };
 
-  useEffect(() => {
-    if (!loaded || users.length > 0) return;
-    fetchUsers();
-  }, [loaded]);
-
-  const [insertUser, updateUser, deleteUser] = useUsers(fetchUsers);
+  const [insertUser, updateUser, deleteUser] = useUsers(fetchData);
   const [
     insertIouTransaction,
     updateIouTransaction,
     deleteIouTransaction,
     fetchTransactionsByID,
-  ] = useIouTransactions(fetchUsers);
-  const [insertBill, deleteBill] = useBills(fetchUsers);
+  ] = useIouTransactions(fetchData);
+  const [insertBill, deleteBill] = useBills(fetchData);
   const [insertBillTransaction, deleteBillTransaction] =
-    useBillTransactions(fetchUsers);
+    useBillTransactions(fetchData);
+
+  const contextValue = {
+    users,
+    bills,
+    setUsers,
+    fetchData,
+    insertUser,
+    updateUser,
+    deleteUser,
+    insertIouTransaction,
+    updateIouTransaction,
+    deleteIouTransaction,
+    insertBill,
+    deleteBill,
+    insertBillTransaction,
+    deleteBillTransaction,
+    fetchTransactionsByID,
+  };
 
   return (
-    <DBContext.Provider
-      value={{
-        users,
-        setUsers,
-        setLoaded,
-        fetchUsers,
-        insertUser,
-        updateUser,
-        deleteUser,
-        insertIouTransaction,
-        updateIouTransaction,
-        deleteIouTransaction,
-        insertBill,
-        deleteBill,
-        insertBillTransaction,
-        deleteBillTransaction,
-        fetchTransactionsByID,
-      }}
-    >
-      {children}
-    </DBContext.Provider>
+    <DBContext.Provider value={contextValue}>{children}</DBContext.Provider>
   );
 };
 
