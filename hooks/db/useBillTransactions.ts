@@ -50,10 +50,30 @@ export const useBillTransactions = (fetchAll: () => Promise<void>) => {
     }
   };
 
+  const updateBillTransaction = async (
+    id: number,
+    note: string,
+    amount: number
+  ): Promise<boolean> => {
+    try {
+      await db
+        .update(billTransactions)
+        .set({ note, amount })
+        .where(eq(billTransactions.id, id))
+        .run();
+      await fetchAll();
+      return true;
+    } catch (error) {
+      console.error("Error updating bill transaction:", error);
+      return false;
+    }
+  };
+
   return [
     insertBillTransaction,
     deleteBillTransaction,
     getBillTransactions,
+    updateBillTransaction,
   ] as const;
 
 };

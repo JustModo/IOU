@@ -15,7 +15,7 @@ import { Bill } from "@/types/bill";
 
 export default function BillForm() {
   const router = useRouter();
-  const { users, insertBill, updateBill } = useDB();
+  const { users, insertBill, updateBill, getBillTransactions } = useDB();
   const { mode, bill } = useLocalSearchParams();
 
   const isUpdate = mode === "update";
@@ -26,18 +26,34 @@ export default function BillForm() {
     isUpdate && billData ? JSON.parse(billData.users) : []
   );
   const [open, setOpen] = useState(false);
+  const [disabledUsers, setDisabledUsers] = useState<number[]>([]);
 
   useEffect(() => {
     if (isUpdate && billData) {
       setBillName(billData.title);
       setSelectedUsers(JSON.parse(billData.users));
+      
+      const checkActiveUsers = async () => {
+        const txs = await getBillTransactions(billData.id);
+        // Find users who have transactions (payer or note author if we tracked that, currently just user field which is name)
+        // Wait, transaction stores user NAME, not ID. accessing users by name to get ID.
+        const activeUserNames = new Set(txs.map(t => t.user));
+        const activeIds = users
+            .filter(u => activeUserNames.has(u.name))
+            .map(u => u.id);
+        setDisabledUsers(activeIds);
+      };
+      checkActiveUsers();
     }
-  }, [mode, bill]);
+  }, [mode, bill, getBillTransactions, users]);
 
   const handleSave = async () => {
     if (!billName || selectedUsers.length === 0) return;
     
-    const userstring = JSON.stringify(selectedUsers);
+    // Ensure disabled users are still selected (DropDownPicker shouldn't remove them if disabled, but good to be safe)
+    const finalSelected = Array.from(new Set([...selectedUsers, ...disabledUsers]));
+
+    const userstring = JSON.stringify(finalSelected);
     let res = false;
 
     if (isUpdate && billData) {
@@ -104,8 +120,13 @@ export default function BillForm() {
                   users?.map((user) => ({
                     label: user.name,
                     value: user.id,
+                    disabled: disabledUsers.includes(user.id)
                   })) || []
                 }
+                mode="BADGE"
+                badgeColors={["#333"]}
+                badgeDotColors={["white"]}
+                badgeTextStyle={{ color: "white" }}
                 containerStyle={{ height: 50 }}
                 style={{ backgroundColor: "#121317", borderWidth: 0 }}
                 dropDownContainerStyle={{
@@ -119,6 +140,7 @@ export default function BillForm() {
                   <Feather name="check" size={20} color="white" />
                 )}
                 placeholder="Select Users"
+                disableBorderRadius={true}
               />
             </View>
           </View>

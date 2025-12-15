@@ -55,6 +55,11 @@ type DBContextType = {
     amount: number
   ) => Promise<boolean>;
   deleteBillTransaction: (id: number) => Promise<boolean>;
+  updateBillTransaction: (
+    id: number,
+    note: string,
+    amount: number
+  ) => Promise<boolean>;
   fetchTransactionsByID: (id: number) => Promise<IOUTransaction[] | null>;
   getBillTransactions: (billId: number) => Promise<any[]>;
 };
@@ -84,7 +89,7 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
     fetchTransactionsByID,
   ] = useIouTransactions(fetchData);
   const [insertBill, deleteBill, updateBill] = useBills(fetchData);
-  const [insertBillTransaction, deleteBillTransaction, getBillTransactions] =
+  const [insertBillTransaction, deleteBillTransaction, getBillTransactions, updateBillTransaction] =
     useBillTransactions(fetchData);
 
   const contextValue = {
@@ -103,6 +108,7 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
     updateBill,
     insertBillTransaction,
     deleteBillTransaction,
+    updateBillTransaction,
     fetchTransactionsByID,
     getBillTransactions,
   };
