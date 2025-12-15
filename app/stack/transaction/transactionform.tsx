@@ -123,7 +123,7 @@ export default function AddTransaction() {
             <Text className="text-white text-7xl">₹</Text>
             <TextInput
               ref={amountInputRef}
-              className="p-4 text-white rounded-lg text-center text-7xl bg-transparent"
+              className="p-4 text-white rounded-lg text-center text-7xl bg-transparent min-w-[100]"
               placeholderTextColor="gray"
               keyboardType="numeric"
               placeholder="0"
@@ -132,49 +132,9 @@ export default function AddTransaction() {
               onChangeText={(text) => {
                 if (/^\d*\.?\d{0,5}$/.test(text) && !/^0\d/.test(text)) {
                   setAmount(text);
-                  requestAnimationFrame(() => {
-                    amountInputRef.current?.setSelection(
-                      text.length,
-                      text.length
-                    );
-                  });
                 }
-              }}
-              onFocus={() => {
-                requestAnimationFrame(() => {
-                  amountInputRef.current?.setSelection(
-                    amount.length,
-                    amount.length
-                  );
-                });
               }}
               value={amount}
-              onSelectionChange={(e) => {
-                const { start, end } = e.nativeEvent.selection;
-                if (start !== amount.length || end !== amount.length) {
-                  requestAnimationFrame(() => {
-                    amountInputRef.current?.setSelection(
-                      amount.length,
-                      amount.length
-                    );
-                  });
-                }
-              }}
-            />
-
-            {/* Transparent overlay to always focus input from the end */}
-            <TouchableOpacity
-              className="absolute w-full h-full"
-              onPress={() => {
-                amountInputRef.current?.focus();
-                requestAnimationFrame(() => {
-                  amountInputRef.current?.setSelection(
-                    amount.length,
-                    amount.length
-                  );
-                });
-              }}
-              activeOpacity={1}
             />
           </View>
 
