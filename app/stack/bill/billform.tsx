@@ -12,10 +12,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDB } from "@/context/DBContext";
 import { Bill } from "@/types/bill";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function BillForm() {
   const router = useRouter();
-  const { users, insertBill, updateBill, getBillTransactions } = useDB();
+  const { users, insertBill, updateBill, deleteBill, getBillTransactions } = useDB();
   const { mode, bill } = useLocalSearchParams();
 
   const isUpdate = mode === "update";
@@ -27,6 +28,9 @@ export default function BillForm() {
   );
   const [open, setOpen] = useState(false);
   const [disabledUsers, setDisabledUsers] = useState<number[]>([]);
+  
+  // Confirm Modal State
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
   useEffect(() => {
     if (isUpdate && billData) {
@@ -35,8 +39,6 @@ export default function BillForm() {
       
       const checkActiveUsers = async () => {
         const txs = await getBillTransactions(billData.id);
-        // Find users who have transactions (payer or note author if we tracked that, currently just user field which is name)
-        // Wait, transaction stores user NAME, not ID. accessing users by name to get ID.
         const activeUserNames = new Set(txs.map(t => t.user));
         const activeIds = users
             .filter(u => activeUserNames.has(u.name))
@@ -50,7 +52,7 @@ export default function BillForm() {
   const handleSave = async () => {
     if (!billName || selectedUsers.length === 0) return;
     
-    // Ensure disabled users are still selected (DropDownPicker shouldn't remove them if disabled, but good to be safe)
+    // Ensure disabled users are still selected
     const finalSelected = Array.from(new Set([...selectedUsers, ...disabledUsers]));
 
     const userstring = JSON.stringify(finalSelected);
@@ -63,6 +65,27 @@ export default function BillForm() {
     }
 
     if (res) router.back();
+  };
+
+  const handleDelete = () => {
+    setConfirmVisible(true);
+  };
+
+  const confirmDelete = async () => {
+      if (!billData) return;
+      
+      // We might want to warn if there are transactions? 
+      // Current requirement is just confirmation. 
+      // The schema delete logic usually handles or we might cascade, but useBills internal logic should handle standard delete.
+      
+      const res = await deleteBill(billData.id);
+      if (res) {
+          // Navigate back twice (to home) or just once?
+          // If we came from BillDetail -> BillForm, deleting means BillDetail is invalid. 
+          // Ideally go to /tabs/bill
+          router.replace("/tabs/bill");
+      }
+      setConfirmVisible(false);
   };
 
   return (
@@ -81,6 +104,11 @@ export default function BillForm() {
             <AntDesign name="left" size={24} color="white" />
             <Text className="text-white font-semibold text-lg">Back</Text>
           </TouchableOpacity>
+          {isUpdate && (
+             <TouchableOpacity onPress={handleDelete}>
+                <Feather name="trash-2" size={24} color="red" />
+             </TouchableOpacity>
+          )}
         </View>
 
         <View className="flex-1 bg-black items-center justify-center px-8 gap-12">
@@ -155,6 +183,16 @@ export default function BillForm() {
             </Text>
           </TouchableOpacity>
         </View>
+        
+        <ConfirmModal
+            visible={confirmVisible}
+            title="Delete Bill"
+            message="Are you sure you want to delete this bill? All related transactions will be lost."
+            onConfirm={confirmDelete}
+            onCancel={() => setConfirmVisible(false)}
+            confirmText="Delete"
+            variant="danger"
+        />
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );

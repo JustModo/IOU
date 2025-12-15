@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -7,10 +7,11 @@ import * as ImagePicker from "expo-image-picker";
 import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
 import * as FileSystem from "expo-file-system";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function AddUser() {
   const router = useRouter();
-  const { insertUser, updateUser } = useDB();
+  const { insertUser, updateUser, deleteUser } = useDB();
 
   const { user, mode } = useLocalSearchParams() as {
     user?: string;
@@ -20,6 +21,9 @@ export default function AddUser() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [name, setName] = useState<string>("");
   const [id, setId] = useState<number | undefined>(undefined);
+  
+  // Confirm Modal State
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
   useEffect(() => {
     if (mode === "update" && user) {
@@ -28,7 +32,6 @@ export default function AddUser() {
         setId(parsedUser.id);
         setName(parsedUser.name);
         setSelectedImage(parsedUser.pfp ?? null);
-        console.log(parsedUser.pfp);
       } catch (error) {
         console.error("Failed to parse user data:", error);
       }
@@ -67,7 +70,7 @@ export default function AddUser() {
         setSelectedImage(newPath);
       }
     } catch (error) {
-      console.error("Error picking image:", error);
+      // console.error("Error picking image:", error);
       alert("An error occurred while picking the image");
     }
   };
@@ -80,10 +83,22 @@ export default function AddUser() {
   };
 
   const handleUpdate = async () => {
-    console.log(id);
     if (!id) return;
     const res = await updateUser(id, name, selectedImage);
     if (res) router.back();
+  };
+
+  const handleDelete = () => {
+    setConfirmVisible(true);
+  };
+
+  const confirmDelete = async () => {
+      if (!id) return;
+      const res = await deleteUser(id);
+      if (res) {
+          router.replace("/");
+      }
+      setConfirmVisible(false);
   };
 
   return (
@@ -97,6 +112,11 @@ export default function AddUser() {
           <AntDesign name="left" size={24} color="white" />
           <Text className="text-white font-semibold text-lg">Back</Text>
         </TouchableOpacity>
+        {mode === "update" && (
+             <TouchableOpacity onPress={handleDelete}>
+                <Feather name="trash-2" size={24} color="red" />
+             </TouchableOpacity>
+        )}
       </View>
 
       <View className="flex-1 bg-black items-center justify-between">
@@ -113,8 +133,7 @@ export default function AddUser() {
                   key={selectedImage}
                   source={{ uri: selectedImage }}
                   className="w-full h-full"
-                  onError={(e) =>
-                    console.log("Image load error:", e.nativeEvent.error)
+                  onError={(e) => {}
                   }
                 />
               ) : (
@@ -153,6 +172,16 @@ export default function AddUser() {
           </Text>
         </TouchableOpacity>
       </View>
+      
+      <ConfirmModal
+        visible={confirmVisible}
+        title="Delete User"
+        message="Are you sure you want to delete this user? Their data will be lost."
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmVisible(false)}
+        confirmText="Delete"
+        variant="danger"
+      />
     </SafeAreaView>
   );
 }

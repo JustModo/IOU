@@ -39,7 +39,6 @@ export default function UserScreen() {
     try {
       const userData = users.find((user) => user.id === userId) || null;
       setData(userData);
-      console.log("Here");
       if (userData) {
         const transactionData = await fetchTransactionsByID(userId);
         setTransactions(transactionData);

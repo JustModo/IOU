@@ -15,6 +15,7 @@ import { Bill } from "@/types/bill";
 import DropDownPicker from "react-native-dropdown-picker";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import BillTransactionRow from "@/components/BillTransactionRow";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function BillScreen() {
   const { id } = useLocalSearchParams();
@@ -41,6 +42,9 @@ export default function BillScreen() {
   
   // Edit State
   const [editingTxId, setEditingTxId] = useState<number | null>(null);
+
+  // Confirm Modal State
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
   const fetchTransactions = useCallback(async (billId: number) => {
     const txs = await getBillTransactions(billId);
@@ -90,13 +94,18 @@ export default function BillScreen() {
     }
   };
 
-  const handleDeleteTransaction = async () => {
+  const handleDeleteTransaction = () => {
+    setConfirmVisible(true);
+  };
+
+  const confirmDelete = async () => {
     if (!editingTxId) return;
     const res = await deleteBillTransaction(editingTxId);
     if (res && bill) {
       fetchTransactions(bill.id);
       resetModal();
     }
+    setConfirmVisible(false);
   };
 
   const openEditModal = (tx: any) => {
@@ -285,6 +294,16 @@ export default function BillScreen() {
              <Text className="text-white font-semibold text-lg">Split Bill</Text>
         </TouchableOpacity>
       </View>
+      
+      <ConfirmModal
+        visible={confirmVisible}
+        title="Delete Transaction"
+        message="Are you sure you want to delete this transaction?"
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmVisible(false)}
+        confirmText="Delete"
+        variant="danger"
+      />
     </SafeAreaView>
   );
 }

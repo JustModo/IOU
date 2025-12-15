@@ -7,6 +7,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { useDB } from "@/context/DBContext";
 import { TransactionType } from "@/types/utils";
 import { IOUTransaction } from "@/types/transaction";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function AddTransaction() {
   const router = useRouter();
@@ -23,15 +24,16 @@ export default function AddTransaction() {
   const [open, setOpen] = useState(false);
   const [transactionId, setTransactionId] = useState(0);
   const amountInputRef = useRef<TextInput | null>(null);
+  
+  // Confirm Modal State
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
   const { insertIouTransaction, updateIouTransaction, deleteIouTransaction } =
     useDB();
 
   useEffect(() => {
-    console.log(mode, transaction);
     if (mode === "update" && transaction) {
       const parsedTransaction: IOUTransaction = JSON.parse(transaction);
-      console.log(parsedTransaction, id);
       setAmount(Math.abs(parsedTransaction.amount).toString());
       setTransactionId(parsedTransaction.id);
       setNote(parsedTransaction.note);
@@ -52,7 +54,6 @@ export default function AddTransaction() {
 
   const handleInsert = async () => {
     if (!id || Array.isArray(id)) {
-      console.error("Invalid ID provided");
       return;
     }
     const parsedID = parseInt(id, 10);
@@ -69,7 +70,6 @@ export default function AddTransaction() {
 
   const handleUpdate = async () => {
     if (!id || Array.isArray(id)) {
-      console.error("Invalid ID provided");
       return;
     }
     const parsedAmount = amount.trim() === "" ? 0 : parseFloat(amount);
@@ -84,10 +84,14 @@ export default function AddTransaction() {
     if (res) router.back();
   };
 
-  const handleDelete = async () => {
-    console.log(transactionId);
-    const res = await deleteIouTransaction(transactionId);
-    if (res) router.back();
+  const handleDelete = () => {
+    setConfirmVisible(true);
+  };
+
+  const confirmDelete = async () => {
+      const res = await deleteIouTransaction(transactionId);
+      if (res) router.back();
+      setConfirmVisible(false);
   };
 
   return (
@@ -101,9 +105,11 @@ export default function AddTransaction() {
           <AntDesign name="left" size={24} color="white" />
           <Text className="text-white font-semibold text-lg">Back</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleDelete}>
-          <Feather name="trash-2" size={24} color="red" />
-        </TouchableOpacity>
+        {mode === "update" && (
+            <TouchableOpacity onPress={handleDelete}>
+            <Feather name="trash-2" size={24} color="red" />
+            </TouchableOpacity>
+        )}
       </View>
 
       <View className="flex-1 bg-black items-center justify-center px-8 gap-12">
@@ -225,6 +231,16 @@ export default function AddTransaction() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <ConfirmModal
+        visible={confirmVisible}
+        title="Delete Transaction"
+        message="Are you sure you want to delete this IOU transaction?"
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmVisible(false)}
+        confirmText="Delete"
+        variant="danger"
+      />
     </SafeAreaView>
   );
 }

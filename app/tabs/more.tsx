@@ -9,10 +9,26 @@ import { sql } from "drizzle-orm";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function More() {
   const { fetchData } = useDB();
   const [loading, setLoading] = useState(false);
+  
+  // Modal State
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfig, setModalConfig] = useState({
+      title: "",
+      message: "",
+      onConfirm: async () => {},
+      confirmText: "Confirm",
+      variant: "danger" as "danger" | "default"
+  });
+
+  const showConfirm = (title: string, message: string, onConfirm: () => Promise<void>, confirmText = "Confirm", variant: "danger" | "default" = "danger") => {
+      setModalConfig({ title, message, onConfirm, confirmText, variant });
+      setModalVisible(true);
+  };
 
   const handleExport = async () => {
     try {
@@ -78,27 +94,28 @@ export default function More() {
 
       if (result.canceled) return;
       
-      setLoading(true);
       const fileUri = result.assets[0].uri;
       const fileContent = await FileSystem.readAsStringAsync(fileUri);
-      const data = JSON.parse(fileContent);
+      
+      let data: any;
+      try {
+          data = JSON.parse(fileContent);
+      } catch (e) {
+          Alert.alert("Error", "Invalid JSON file");
+          return;
+      }
 
       if (!data.users || !data.iouTransactions || !data.bills || !data.billTransactions) {
         Alert.alert("Error", "Invalid backup file format");
-        setLoading(false);
         return;
       }
 
-      Alert.alert(
-        "Confirm Restore",
-        "This will overwrite all current data. Are you sure?",
-        [
-          { text: "Cancel", style: "cancel", onPress: () => setLoading(false) },
-          {
-            text: "Restore",
-            style: "destructive",
-            onPress: async () => {
+      showConfirm(
+          "Confirm Restore",
+          "This will overwrite all current data. Are you sure?",
+          async () => {
               try {
+                setLoading(true);
                 // Wipe existing data
                 await db.delete(billTransactions).run();
                 await db.delete(billTable).run();
@@ -112,6 +129,7 @@ export default function More() {
                 if (data.billTransactions.length > 0) await db.insert(billTransactions).values(data.billTransactions).run();
                 
                 await fetchData();
+                setModalVisible(false);
                 Alert.alert("Success", "Data restored successfully");
               } catch (e) {
                 console.error(e);
@@ -119,27 +137,20 @@ export default function More() {
               } finally {
                 setLoading(false);
               }
-            },
           },
-        ]
+          "Restore"
       );
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to import file");
-      setLoading(false);
     }
   };
 
   const handleWipe = () => {
-    Alert.alert(
-      "Confirm Wipe",
-      "Are you sure you want to delete ALL data? This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete All",
-          style: "destructive",
-          onPress: async () => {
+    showConfirm(
+        "Confirm Wipe",
+        "Are you sure you want to delete ALL data? This action cannot be undone.",
+        async () => {
             try {
               setLoading(true);
               await db.delete(billTransactions).run();
@@ -147,6 +158,7 @@ export default function More() {
               await db.delete(iouTransactions).run();
               await db.delete(usersTable).run();
               await fetchData();
+              setModalVisible(false);
               Alert.alert("Success", "App data wiped successfully");
             } catch (e) {
               console.error(e);
@@ -154,9 +166,8 @@ export default function More() {
             } finally {
               setLoading(false);
             }
-          },
         },
-      ]
+        "Delete All"
     );
   };
 
@@ -227,6 +238,16 @@ export default function More() {
             <Text className="text-center text-gray-500 mt-4">Processing...</Text>
         )}
       </ScrollView>
+
+      <ConfirmModal
+        visible={modalVisible}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalVisible(false)}
+        confirmText={modalConfig.confirmText}
+        variant={modalConfig.variant}
+      />
     </SafeAreaView>
   );
 }
