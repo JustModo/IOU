@@ -3,25 +3,27 @@ import { Text, View, TextInput, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 interface TitleBarProps {
-  searchText: string;
-  setSearchText: (text: string) => void;
   title: string;
+  searchText?: string;
+  setSearchText?: (text: string) => void;
   children?: ReactNode;
 }
 
 export default function TitleBar({
+  title,
   searchText,
   setSearchText,
-  title,
   children,
 }: TitleBarProps) {
   const [searchActive, setSearchActive] = useState(false);
 
+  const searchEnabled = searchText !== undefined && setSearchText !== undefined;
+
   return (
     <View className="w-screen h-16 bg-[#121317] flex-row items-center px-6">
-      {searchActive ? (
+      {searchEnabled && searchActive ? (
         <TextInput
-          className="flex-1 text-white py-2 rounded-lg text-xl "
+          className="flex-1 text-white py-2 rounded-lg text-xl"
           placeholder="Search..."
           placeholderTextColor="#aaa"
           value={searchText}
@@ -34,21 +36,23 @@ export default function TitleBar({
         </Text>
       )}
 
-      <Pressable
-        onPress={() => {
-          setSearchText("");
-          setSearchActive(!searchActive);
-        }}
-        className="ml-4"
-      >
-        <Ionicons
-          name={searchActive ? "close" : "search"}
-          size={24}
-          color="white"
-        />
-      </Pressable>
+      {searchEnabled && (
+        <Pressable
+          onPress={() => {
+            setSearchText("");
+            setSearchActive((prev) => !prev);
+          }}
+          className="ml-4"
+        >
+          <Ionicons
+            name={searchActive ? "close" : "search"}
+            size={24}
+            color="white"
+          />
+        </Pressable>
+      )}
 
-      {children}
+      {searchEnabled && children}
     </View>
   );
 }

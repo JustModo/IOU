@@ -1,14 +1,10 @@
 import { Bill } from "@/types/bill";
-import { Status } from "@/types/utils";
 import { Entypo } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export default function BillTab({ bill }: { bill: Bill }) {
   const router = useRouter();
-
-  const status: Status =
-    bill.amount > 0 ? "positive" : bill.amount < 0 ? "negative" : "neutral";
 
   return (
     <TouchableOpacity
@@ -33,17 +29,9 @@ export default function BillTab({ bill }: { bill: Bill }) {
       {/* Right Side (Number) */}
       <View className="items-end justify-center pr-4 flex-1">
         <Text
-          className={`font-light text-2xl ${
-            status === "positive"
-              ? "text-green-500"
-              : status === "negative"
-              ? "text-red-500"
-              : "text-[#aaa]"
-          }`}
+          className={`font-light text-2xl text-[#aaa]`}
         >
-          {`${
-            status === "positive" ? "+" : status === "negative" ? "-" : ""
-          } ${Math.abs(bill.amount)}`}
+           {Math.abs(bill.amount)}
         </Text>
       </View>
     </TouchableOpacity>

@@ -1,8 +1,27 @@
 import { eq } from "drizzle-orm";
 import { db } from "../../db";
-import { billTransactions } from "../../db/schema";
+import { billTransactions, billTable } from "../../db/schema";
 
 export const useBillTransactions = (fetchAll: () => Promise<void>) => {
+  const updateBillTotal = async (billId: number) => {
+    try {
+      const transactions = await db
+        .select()
+        .from(billTransactions)
+        .where(eq(billTransactions.bill_id, billId));
+      
+      const total = transactions.reduce((sum, t) => sum + t.amount, 0);
+
+      await db
+        .update(billTable)
+        .set({ amount: total })
+        .where(eq(billTable.id, billId))
+        .run();
+    } catch (error) {
+      console.error("Error updating bill total:", error);
+    }
+  };
+
   const insertBillTransaction = async (
     billId: number,
     user: string,
@@ -15,6 +34,7 @@ export const useBillTransactions = (fetchAll: () => Promise<void>) => {
         .insert(billTransactions)
         .values({ bill_id: billId, user, note, amount, date })
         .run();
+      await updateBillTotal(billId);
       await fetchAll();
       return true;
     } catch (error) {
@@ -25,10 +45,21 @@ export const useBillTransactions = (fetchAll: () => Promise<void>) => {
 
   const deleteBillTransaction = async (id: number): Promise<boolean> => {
     try {
+      // Fetch transaction to get bill_id before deleting
+      const tx = await db
+        .select()
+        .from(billTransactions)
+        .where(eq(billTransactions.id, id))
+        .get();
+
+      if (!tx) return false;
+
       await db
         .delete(billTransactions)
         .where(eq(billTransactions.id, id))
         .run();
+        
+      await updateBillTotal(tx.bill_id);
       await fetchAll();
       return true;
     } catch (error) {
@@ -56,11 +87,21 @@ export const useBillTransactions = (fetchAll: () => Promise<void>) => {
     amount: number
   ): Promise<boolean> => {
     try {
+        const tx = await db
+        .select()
+        .from(billTransactions)
+        .where(eq(billTransactions.id, id))
+        .get();
+
+      if (!tx) return false;
+
       await db
         .update(billTransactions)
         .set({ note, amount })
         .where(eq(billTransactions.id, id))
         .run();
+        
+      await updateBillTotal(tx.bill_id);
       await fetchAll();
       return true;
     } catch (error) {
