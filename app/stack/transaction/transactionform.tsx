@@ -47,7 +47,7 @@ export default function AddTransaction() {
   const mapping: Record<TransactionType, { title: string; mul: number }> = {
     oweme: { title: "You Owe Me", mul: 1 },
     oweyou: { title: "I Owe You", mul: -1 },
-    repay: { title: "Repay", mul: -1 },
+    repay: { title: "Repay", mul: 1 },
   };
 
   const setting = mapping[selectedType];
