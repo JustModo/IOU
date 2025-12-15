@@ -27,5 +27,25 @@ export const useBills = (fetchAll: () => Promise<void>) => {
     }
   };
 
-  return [insertBill, deleteBill] as const;
+  const updateBill = async (
+    id: number,
+    title: string,
+    users: string
+  ): Promise<boolean> => {
+    try {
+      await db
+        .update(billTable)
+        .set({ title, users })
+        .where(eq(billTable.id, id))
+        .run();
+      await fetchAll();
+      return true;
+    } catch (error) {
+      console.error("Error updating bill:", error);
+      return false;
+    }
+  };
+
+  return [insertBill, deleteBill, updateBill] as const;
+
 };

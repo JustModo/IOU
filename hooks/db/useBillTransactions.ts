@@ -37,5 +37,23 @@ export const useBillTransactions = (fetchAll: () => Promise<void>) => {
     }
   };
 
-  return [insertBillTransaction, deleteBillTransaction] as const;
+  const getBillTransactions = async (billId: number) => {
+    try {
+      const transactions = await db
+        .select()
+        .from(billTransactions)
+        .where(eq(billTransactions.bill_id, billId));
+      return transactions;
+    } catch (error) {
+      console.error("Error fetching bill transactions:", error);
+      return [];
+    }
+  };
+
+  return [
+    insertBillTransaction,
+    deleteBillTransaction,
+    getBillTransactions,
+  ] as const;
+
 };

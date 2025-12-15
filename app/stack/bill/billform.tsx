@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   Text,
   TextInput,
@@ -11,22 +11,44 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDB } from "@/context/DBContext";
+import { Bill } from "@/types/bill";
 
 export default function BillForm() {
   const router = useRouter();
-  const { users, insertBill } = useDB();
+  const { users, insertBill, updateBill } = useDB();
+  const { mode, bill } = useLocalSearchParams();
 
-  const [billName, setBillName] = useState("");
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+  const isUpdate = mode === "update";
+  const billData: Bill | null = bill ? JSON.parse(bill as string) : null;
+
+  const [billName, setBillName] = useState(isUpdate ? billData?.title || "" : "");
+  const [selectedUsers, setSelectedUsers] = useState<number[]>(
+    isUpdate && billData ? JSON.parse(billData.users) : []
+  );
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (isUpdate && billData) {
+      setBillName(billData.title);
+      setSelectedUsers(JSON.parse(billData.users));
+    }
+  }, [mode, bill]);
+
   const handleSave = async () => {
-    console.log("Bill Name:", billName);
-    console.log("Selected User IDs:", selectedUsers);
+    if (!billName || selectedUsers.length === 0) return;
+    
     const userstring = JSON.stringify(selectedUsers);
-    const res = await insertBill(billName, userstring);
+    let res = false;
+
+    if (isUpdate && billData) {
+      res = await updateBill(billData.id, billName, userstring);
+    } else {
+      res = await insertBill(billName, userstring);
+    }
+
     if (res) router.back();
   };
+
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -47,7 +69,7 @@ export default function BillForm() {
 
         <View className="flex-1 bg-black items-center justify-center px-8 gap-12">
           <Text className="text-white font-light text-6xl text-center">
-            Create Bill
+            {isUpdate ? "Edit Bill" : "Create Bill"}
           </Text>
 
           {/* Input Section */}
@@ -92,6 +114,7 @@ export default function BillForm() {
                 }}
                 labelStyle={{ color: "#fff" }}
                 textStyle={{ color: "#fff" }}
+                theme="DARK"
                 TickIconComponent={() => (
                   <Feather name="check" size={20} color="white" />
                 )}
