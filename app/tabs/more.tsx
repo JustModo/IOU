@@ -11,6 +11,8 @@ import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
 import ConfirmModal from "@/components/ConfirmModal";
 
+import { APP_VERSION } from "@/constants/version";
+
 export default function More() {
   const { fetchData } = useDB();
   const [loading, setLoading] = useState(false);
@@ -29,7 +31,6 @@ export default function More() {
       setModalConfig({ title, message, onConfirm, confirmText, variant });
       setModalVisible(true);
   };
-
   const handleExport = async () => {
     try {
       setLoading(true);
@@ -39,14 +40,16 @@ export default function More() {
       const billTxData = await db.select().from(billTransactions);
 
       const backupData = {
+        appVersion: APP_VERSION,
+        version: 1, // Keep this for backward compatibility or schema versioning
+        date: new Date().toISOString(),
         users: usersData,
         iouTransactions: iouTxData,
         bills: billsData,
         billTransactions: billTxData,
-        version: 1,
-        date: new Date().toISOString(),
       };
-
+      
+      // ... existing export logic
       const jsonString = JSON.stringify(backupData, null, 2);
 
       if (Platform.OS === "android") {
@@ -55,8 +58,8 @@ export default function More() {
         if (permissions.granted) {
           const uri = await FileSystem.StorageAccessFramework.createFileAsync(
             permissions.directoryUri,
-            "iou_backup.json",
-            "application/json"
+            `iou_backup_v${APP_VERSION}_${new Date().toISOString().split('T')[0]}.json`,
+             "application/json"
           );
           
           await FileSystem.writeAsStringAsync(uri, jsonString, {
@@ -68,7 +71,7 @@ export default function More() {
         }
       } else {
         // Fallback for iOS / other platforms
-        const fileUri = FileSystem.documentDirectory + "iou_backup.json";
+        const fileUri = FileSystem.documentDirectory + `iou_backup_v${APP_VERSION}.json`;
         await FileSystem.writeAsStringAsync(fileUri, jsonString);
 
         if (await Sharing.isAvailableAsync()) {
@@ -105,11 +108,16 @@ export default function More() {
           return;
       }
 
+      // Check for version compatibility if needed in future
+      // const backupVersion = data.appVersion || "unknown";
+      // console.log("Restoring backup from version:", backupVersion);
+
       if (!data.users || !data.iouTransactions || !data.bills || !data.billTransactions) {
         Alert.alert("Error", "Invalid backup file format");
         return;
       }
-
+      
+      // ... existing restore logic
       showConfirm(
           "Confirm Restore",
           "This will overwrite all current data. Are you sure?",
