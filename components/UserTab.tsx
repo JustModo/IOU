@@ -1,14 +1,14 @@
 import { User } from "@/types/user";
-import { Status } from "@/types/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { getAmountStatus, formatAmount, statusColor } from "@/utils";
 
 export default function UserTab({ user }: { user: User }) {
   const router = useRouter();
 
-  const status: Status =
-    user.amount > 0 ? "positive" : user.amount < 0 ? "negative" : "neutral";
+  const status = getAmountStatus(user.amount);
+  const { display } = formatAmount(user.amount);
 
   return (
     <TouchableOpacity
@@ -37,17 +37,9 @@ export default function UserTab({ user }: { user: User }) {
       {/* Right Side (Number) */}
       <View className="items-end justify-center pr-4 flex-1">
         <Text
-          className={`font-light text-2xl ${
-            status === "positive"
-              ? "text-green-500"
-              : status === "negative"
-              ? "text-red-500"
-              : "text-[#aaa]"
-          }`}
+          className={`font-light text-2xl ${statusColor(status)}`}
         >
-          {`${
-            status === "positive" ? "+" : status === "negative" ? "-" : ""
-          } ${Math.abs(user.amount)}`}
+          {display}
         </Text>
       </View>
     </TouchableOpacity>

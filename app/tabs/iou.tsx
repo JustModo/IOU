@@ -7,6 +7,7 @@ import UserTab from "@/components/UserTab";
 import { User } from "@/types/user";
 import { useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
+import { filterUsers, sortUsers } from "@/utils";
 
 export default function IOU() {
   const { users } = useDB();
@@ -16,17 +17,7 @@ export default function IOU() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    setFilteredUsers(
-      users
-        .filter((user) =>
-          user.name.toLowerCase().includes(searchText.toLowerCase())
-        )
-        .sort(
-          (a, b) =>
-            (b.amount !== 0 ? b.amount : -Infinity) -
-            (a.amount !== 0 ? a.amount : -Infinity)
-        )
-    );
+    setFilteredUsers(sortUsers(filterUsers(users, searchText)));
   }, [searchText, users]);
 
   return (

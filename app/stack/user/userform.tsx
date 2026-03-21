@@ -3,10 +3,9 @@ import { AntDesign, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as ImagePicker from "expo-image-picker";
 import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
-import * as FileSystem from "expo-file-system";
+import { pickAndSaveImage } from "@/services/imageService";
 import ConfirmModal from "@/components/ConfirmModal";
 
 export default function AddUser() {
@@ -38,40 +37,12 @@ export default function AddUser() {
     }
   }, [mode, user]);
 
-  const pickImage = async () => {
+  const handlePickImage = async () => {
     try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission to access gallery is required!");
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: "images",
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const sourceUri = result.assets[0].uri;
-
-        const imagesDir = `${FileSystem.documentDirectory}images/`;
-        await FileSystem.makeDirectoryAsync(imagesDir, { intermediates: true });
-
-        const newPath = `${imagesDir}${Date.now()}.jpg`;
-
-        await FileSystem.moveAsync({
-          from: sourceUri,
-          to: newPath,
-        });
-
-        setSelectedImage(newPath);
-      }
-    } catch (error) {
-      // console.error("Error picking image:", error);
-      alert("An error occurred while picking the image");
+      const uri = await pickAndSaveImage();
+      if (uri) setSelectedImage(uri);
+    } catch (error: any) {
+      alert(error?.message || "An error occurred while picking the image");
     }
   };
 
@@ -124,7 +95,7 @@ export default function AddUser() {
         <View className="flex-1 items-center gap-4 w-full py-16">
           <View className="bg-[#121317] h-60 w-60 rounded-full overflow-hidden">
             <TouchableOpacity
-              onPress={pickImage}
+              onPress={handlePickImage}
               onLongPress={() => setSelectedImage(null)}
               className="w-full h-full justify-center items-center"
             >

@@ -8,7 +8,7 @@ import {
 import { useRef } from "react";
 import { IOUTransaction } from "@/types/transaction";
 import { useRouter } from "expo-router";
-import { Status } from "@/types/utils";
+import { formatDateToDisplay, formatAmount, getAmountStatus, statusColor } from "@/utils";
 
 type TransactionTabProps = {
   transaction: IOUTransaction;
@@ -52,23 +52,6 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
     extrapolate: "clamp",
   });
 
-  const formatToUTC = (isoString: string): string => {
-    const date = new Date(isoString);
-
-    const day = date.getUTCDate().toString().padStart(2, "0");
-    const month = date.toLocaleString("en-US", {
-      month: "long",
-      timeZone: "UTC",
-    });
-    const year = date.getUTCFullYear();
-
-    const hours = date.getUTCHours() % 12 || 12;
-    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
-    const ampm = date.getUTCHours() >= 12 ? "PM" : "AM";
-
-    return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
-  };
-
   const handleEvent = () => {
     router.push({
       pathname: `/stack/transaction/transactionform`,
@@ -80,12 +63,8 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
     });
   };
 
-  const status: Status =
-    transaction.amount > 0
-      ? "positive"
-      : transaction.amount < 0
-      ? "negative"
-      : "neutral";
+  const status = getAmountStatus(transaction.amount);
+  const { display } = formatAmount(transaction.amount);
 
   return (
     <PanGestureHandler
@@ -119,21 +98,13 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
               {transaction.note !== "" ? transaction.note : "Note"}
             </Text>
             <Text className="text-sm text-[#aaa]">
-              {formatToUTC(transaction.date)}
+              {formatDateToDisplay(transaction.date)}
             </Text>
           </View>
           <Text
-            className={`font-light text-2xl ${
-              status === "positive"
-                ? "text-green-500"
-                : status === "negative"
-                ? "text-red-500"
-                : "text-[#aaa]"
-            }`}
+            className={`font-light text-2xl ${statusColor(status)}`}
           >
-            {`${
-              transaction.amount > 0 ? "+" : transaction.amount < 0 ? "-" : ""
-            } ${Math.abs(transaction.amount)}`}
+            {display}
           </Text>
         </Animated.View>
         <Animated.View

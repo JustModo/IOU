@@ -1,80 +1,34 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, Alert, ScrollView, Platform } from "react-native";
-import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
-import * as DocumentPicker from "expo-document-picker";
-import { db } from "@/db";
-import { usersTable, iouTransactions } from "@/db/schema";
+import { View, Text, TouchableOpacity, SafeAreaView, Alert, ScrollView } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
 import ConfirmModal from "@/components/ConfirmModal";
-
-import { APP_VERSION } from "@/constants/version";
+import * as backupService from "@/services/backupService";
 
 export default function More() {
   const { fetchData } = useDB();
   const [loading, setLoading] = useState(false);
-  
+
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfig, setModalConfig] = useState({
-      title: "",
-      message: "",
-      onConfirm: async () => {},
-      confirmText: "Confirm",
-      variant: "danger" as "danger" | "default"
+    title: "",
+    message: "",
+    onConfirm: async () => { },
+    confirmText: "Confirm",
+    variant: "danger" as "danger" | "default"
   });
 
   const showConfirm = (title: string, message: string, onConfirm: () => Promise<void>, confirmText = "Confirm", variant: "danger" | "default" = "danger") => {
-      setModalConfig({ title, message, onConfirm, confirmText, variant });
-      setModalVisible(true);
+    setModalConfig({ title, message, onConfirm, confirmText, variant });
+    setModalVisible(true);
   };
+
   const handleExport = async () => {
     try {
       setLoading(true);
-      const usersData = await db.select().from(usersTable);
-      const iouTxData = await db.select().from(iouTransactions);
-
-      const backupData = {
-        appVersion: APP_VERSION,
-        version: 1, // Keep this for backward compatibility or schema versioning
-        date: new Date().toISOString(),
-        users: usersData,
-        iouTransactions: iouTxData,
-      };
-      
-      // ... existing export logic
-      const jsonString = JSON.stringify(backupData, null, 2);
-
-      if (Platform.OS === "android") {
-        const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-        
-        if (permissions.granted) {
-          const uri = await FileSystem.StorageAccessFramework.createFileAsync(
-            permissions.directoryUri,
-            `iou_backup_v${APP_VERSION}_${new Date().toISOString().split('T')[0]}.json`,
-             "application/json"
-          );
-          
-          await FileSystem.writeAsStringAsync(uri, jsonString, {
-            encoding: FileSystem.EncodingType.UTF8,
-          });
-          Alert.alert("Success", "Backup saved successfully!");
-        } else {
-            // User cancelled permission
-        }
-      } else {
-        // Fallback for iOS / other platforms
-        const fileUri = FileSystem.documentDirectory + `iou_backup_v${APP_VERSION}.json`;
-        await FileSystem.writeAsStringAsync(fileUri, jsonString);
-
-        if (await Sharing.isAvailableAsync()) {
-            await Sharing.shareAsync(fileUri);
-        } else {
-             Alert.alert("Error", "Sharing is not available on this device");
-        }
-      }
+      await backupService.exportBackup();
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to export data");
@@ -85,92 +39,59 @@ export default function More() {
 
   const handleImport = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: "application/json",
-        copyToCacheDirectory: true,
-      });
+      const data = await backupService.parseBackupFile();
+      if (!data) return; // User cancelled
 
-      if (result.canceled) return;
-      
-      const fileUri = result.assets[0].uri;
-      const fileContent = await FileSystem.readAsStringAsync(fileUri);
-      
-      let data: any;
-      try {
-          data = JSON.parse(fileContent);
-      } catch (e) {
-          Alert.alert("Error", "Invalid JSON file");
-          return;
-      }
-
-      // Check for version compatibility if needed in future
-      // const backupVersion = data.appVersion || "unknown";
-      // console.log("Restoring backup from version:", backupVersion);
-
-      if (!data.users || !data.iouTransactions) {
-        Alert.alert("Error", "Invalid backup file format");
-        return;
-      }
-      
-      // ... existing restore logic
       showConfirm(
-          "Confirm Restore",
-          "This will overwrite all current data. Are you sure?",
-          async () => {
-              try {
-                setLoading(true);
-                // Wipe existing data
-                await db.delete(iouTransactions).run();
-                await db.delete(usersTable).run();
-
-                // Insert new data
-                if (data.users.length > 0) await db.insert(usersTable).values(data.users).run();
-                if (data.iouTransactions.length > 0) await db.insert(iouTransactions).values(data.iouTransactions).run();
-                
-                await fetchData();
-                setModalVisible(false);
-                Alert.alert("Success", "Data restored successfully");
-              } catch (e) {
-                console.error(e);
-                Alert.alert("Error", "Failed to restore data");
-              } finally {
-                setLoading(false);
-              }
-          },
-          "Restore"
+        "Confirm Restore",
+        "This will overwrite all current data. Are you sure?",
+        async () => {
+          try {
+            setLoading(true);
+            await backupService.restoreBackup(data);
+            await fetchData();
+            setModalVisible(false);
+            Alert.alert("Success", "Data restored successfully");
+          } catch (e) {
+            console.error(e);
+            Alert.alert("Error", "Failed to restore data");
+          } finally {
+            setLoading(false);
+          }
+        },
+        "Restore"
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      Alert.alert("Error", "Failed to import file");
+      Alert.alert("Error", error?.message || "Failed to import file");
     }
   };
 
   const handleWipe = () => {
     showConfirm(
-        "Confirm Wipe",
-        "Are you sure you want to delete ALL data? This action cannot be undone.",
-        async () => {
-            try {
-              setLoading(true);
-              await db.delete(iouTransactions).run();
-              await db.delete(usersTable).run();
-              await fetchData();
-              setModalVisible(false);
-              Alert.alert("Success", "App data wiped successfully");
-            } catch (e) {
-              console.error(e);
-              Alert.alert("Error", "Failed to wipe data");
-            } finally {
-              setLoading(false);
-            }
-        },
-        "Delete All"
+      "Confirm Wipe",
+      "Are you sure you want to delete ALL data? This action cannot be undone.",
+      async () => {
+        try {
+          setLoading(true);
+          await backupService.wipeAllData();
+          await fetchData();
+          setModalVisible(false);
+          Alert.alert("Success", "App data wiped successfully");
+        } catch (e) {
+          console.error(e);
+          Alert.alert("Error", "Failed to wipe data");
+        } finally {
+          setLoading(false);
+        }
+      },
+      "Delete All"
     );
   };
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-           <TitleBar
+      <TitleBar
 
         title="MORE"
       >
@@ -179,60 +100,60 @@ export default function More() {
 
       <ScrollView className="flex-1 p-4">
         <Text className="text-gray-500 text-sm font-semibold mb-4 ml-2 uppercase">Data Management</Text>
-        
+
         <View className="bg-[#121317] rounded-xl overflow-hidden mb-8">
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center p-4 border-b border-gray-800 active:bg-gray-900"
             onPress={handleExport}
             disabled={loading}
           >
             <View className="w-10 h-10 rounded-full bg-blue-900/30 items-center justify-center mr-4">
-               <Feather name="upload" size={20} color="#60a5fa" />
+              <Feather name="upload" size={20} color="#60a5fa" />
             </View>
             <View className="flex-1">
-                <Text className="text-white text-lg font-medium">Backup Data</Text>
-                <Text className="text-gray-400 text-sm">Export your data to a JSON file</Text>
+              <Text className="text-white text-lg font-medium">Backup Data</Text>
+              <Text className="text-gray-400 text-sm">Export your data to a JSON file</Text>
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center p-4 active:bg-gray-900"
             onPress={handleImport}
             disabled={loading}
           >
             <View className="w-10 h-10 rounded-full bg-green-900/30 items-center justify-center mr-4">
-               <Feather name="download" size={20} color="#4ade80" />
+              <Feather name="download" size={20} color="#4ade80" />
             </View>
             <View className="flex-1">
-                <Text className="text-white text-lg font-medium">Restore Data</Text>
-                <Text className="text-gray-400 text-sm">Import data from a backup file</Text>
+              <Text className="text-white text-lg font-medium">Restore Data</Text>
+              <Text className="text-gray-400 text-sm">Import data from a backup file</Text>
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
         </View>
 
         <Text className="text-gray-500 text-sm font-semibold mb-4 ml-2 uppercase">Danger Zone</Text>
-        
+
         <View className="bg-[#121317] rounded-xl overflow-hidden mb-8">
-            <TouchableOpacity 
-                className="flex-row items-center p-4 active:bg-gray-900"
-                onPress={handleWipe}
-                disabled={loading}
-            >
-                <View className="w-10 h-10 rounded-full bg-red-900/30 items-center justify-center mr-4">
-                <Feather name="trash-2" size={20} color="#f87171" />
-                </View>
-                <View className="flex-1">
-                    <Text className="text-red-400 text-lg font-medium">Wipe All Data</Text>
-                    <Text className="text-gray-400 text-sm">Permanently delete all app data</Text>
-                </View>
-                <MaterialIcons name="chevron-right" size={24} color="#666" />
-            </TouchableOpacity>
+          <TouchableOpacity
+            className="flex-row items-center p-4 active:bg-gray-900"
+            onPress={handleWipe}
+            disabled={loading}
+          >
+            <View className="w-10 h-10 rounded-full bg-red-900/30 items-center justify-center mr-4">
+              <Feather name="trash-2" size={20} color="#f87171" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-red-400 text-lg font-medium">Wipe All Data</Text>
+              <Text className="text-gray-400 text-sm">Permanently delete all app data</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color="#666" />
+          </TouchableOpacity>
         </View>
 
         {loading && (
-            <Text className="text-center text-gray-500 mt-4">Processing...</Text>
+          <Text className="text-center text-gray-500 mt-4">Processing...</Text>
         )}
       </ScrollView>
 

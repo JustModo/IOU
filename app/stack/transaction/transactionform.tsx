@@ -8,6 +8,7 @@ import { useDB } from "@/context/DBContext";
 import { TransactionType } from "@/types/utils";
 import { IOUTransaction } from "@/types/transaction";
 import ConfirmModal from "@/components/ConfirmModal";
+import { TRANSACTION_TYPE_MAP, normalizeTransactionAmount } from "@/utils";
 
 export default function AddTransaction() {
   const router = useRouter();
@@ -44,13 +45,7 @@ export default function AddTransaction() {
     }
   }, [mode, transaction, id, type]);
 
-  const mapping: Record<TransactionType, { title: string; mul: number }> = {
-    oweme: { title: "You Owe Me", mul: 1 },
-    oweyou: { title: "I Owe You", mul: -1 },
-    repay: { title: "Repay", mul: 1 },
-  };
-
-  const setting = mapping[selectedType];
+  const setting = TRANSACTION_TYPE_MAP[selectedType];
 
   const handleInsert = async () => {
     if (!id || Array.isArray(id)) {
@@ -62,7 +57,7 @@ export default function AddTransaction() {
     const res = await insertIouTransaction(
       parsedID,
       updatedNote,
-      parsedAmount * setting.mul,
+      normalizeTransactionAmount(parsedAmount, selectedType),
       selectedType
     );
     if (res) router.back();
@@ -73,7 +68,7 @@ export default function AddTransaction() {
       return;
     }
     const parsedAmount = amount.trim() === "" ? 0 : parseFloat(amount);
-    const normalAmount = parsedAmount * setting.mul;
+    const normalAmount = normalizeTransactionAmount(parsedAmount, selectedType);
     const updatedNote = selectedType === "repay" ? "Repaid" : note;
     const res = await updateIouTransaction(
       transactionId,

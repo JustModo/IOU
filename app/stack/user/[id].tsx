@@ -14,9 +14,9 @@ import {
   ScrollView,
 } from "react-native-gesture-handler";
 import { useDB } from "@/context/DBContext";
-import { Status } from "@/types/utils";
 import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";
+import { getAmountStatus, formatAmount, statusColor } from "@/utils";
 
 export default function UserScreen() {
   const router = useRouter();
@@ -64,8 +64,8 @@ export default function UserScreen() {
     );
   }
 
-  const status: Status =
-    data.amount > 0 ? "positive" : data.amount < 0 ? "negative" : "neutral";
+  const status = getAmountStatus(data.amount);
+  const { display } = formatAmount(data.amount);
 
   return (
     <SafeAreaView className="bg-black flex-1">
@@ -102,17 +102,9 @@ export default function UserScreen() {
 
         <View className="flex-1 items-end justify-end">
           <Text
-            className={`font-light text-3xl ${
-              status === "positive"
-                ? "text-green-500"
-                : status === "negative"
-                ? "text-red-500"
-                : "text-[#aaa]"
-            }`}
+            className={`font-light text-3xl ${statusColor(status)}`}
           >
-            {`${
-              status === "positive" ? "+" : status === "negative" ? "-" : ""
-            } ${Math.abs(data.amount)}`}
+            {display}
           </Text>
           <Text
             className="text-white text-4xl"

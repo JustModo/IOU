@@ -5,14 +5,12 @@ import {
   Dispatch,
   SetStateAction,
   useState,
-  useEffect,
 } from "react";
 import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";
 import { TransactionType } from "@/types/utils";
-import { useUsers, useIouTransactions } from "@/hooks/db";
-import { usersTable } from "@/db/schema";
-import { db } from "@/db";
+import * as userSvc from "@/services/userService";
+import * as txSvc from "@/services/transactionService";
 
 type DBContextType = {
   users: User[];
@@ -46,22 +44,111 @@ const DBContext = createContext<DBContextType | undefined>(undefined);
 export const DBProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
 
+  // ── Data refresh ────────────────────────────────────────────────────
   const fetchData = async (): Promise<void> => {
     try {
-      const fetchedUsers: User[] = await db.select().from(usersTable).all();
-      setUsers(fetchedUsers);
+      const fetched = await userSvc.getAllUsers();
+      setUsers(fetched);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-  const [insertUser, updateUser, deleteUser] = useUsers(fetchData);
-  const [
-    insertIouTransaction,
-    updateIouTransaction,
-    deleteIouTransaction,
-    fetchTransactionsByID,
-  ] = useIouTransactions(fetchData);
+  // ── User operations ─────────────────────────────────────────────────
+  const insertUser = async (
+    name: string,
+    pfp: string | null
+  ): Promise<boolean> => {
+    try {
+      await userSvc.insertUser(name, pfp);
+      await fetchData();
+      return true;
+    } catch (error) {
+      console.error("Error inserting user:", error);
+      return false;
+    }
+  };
+
+  const updateUser = async (
+    id: number,
+    name: string,
+    pfp: string | null
+  ): Promise<boolean> => {
+    try {
+      await userSvc.updateUser(id, name, pfp);
+      await fetchData();
+      return true;
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return false;
+    }
+  };
+
+  const deleteUser = async (id: number): Promise<boolean> => {
+    try {
+      await userSvc.deleteUser(id);
+      await fetchData();
+      return true;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return false;
+    }
+  };
+
+  // ── Transaction operations ──────────────────────────────────────────
+  const insertIouTransaction = async (
+    userId: number,
+    note: string,
+    amount: number,
+    type: TransactionType
+  ): Promise<boolean> => {
+    try {
+      await txSvc.insertTransaction(userId, note, amount, type);
+      await fetchData();
+      return true;
+    } catch (error) {
+      console.error("Error inserting IOU transaction:", error);
+      return false;
+    }
+  };
+
+  const updateIouTransaction = async (
+    transactionId: number,
+    note: string,
+    newAmount: number,
+    type: TransactionType
+  ): Promise<boolean> => {
+    try {
+      await txSvc.updateTransaction(transactionId, note, newAmount, type);
+      await fetchData();
+      return true;
+    } catch (error) {
+      console.error("Error updating IOU transaction:", error);
+      return false;
+    }
+  };
+
+  const deleteIouTransaction = async (id: number): Promise<boolean> => {
+    try {
+      await txSvc.deleteTransaction(id);
+      await fetchData();
+      return true;
+    } catch (error) {
+      console.error("Error deleting IOU transaction:", error);
+      return false;
+    }
+  };
+
+  const fetchTransactionsByID = async (
+    id: number
+  ): Promise<IOUTransaction[] | null> => {
+    try {
+      return await txSvc.getTransactionsByUserId(id);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      return null;
+    }
+  };
 
   const contextValue = {
     users,

@@ -1,0 +1,128 @@
+import { db } from "@/db";
+import { usersTable, iouTransactions } from "@/db/schema";
+import { APP_VERSION } from "@/constants/version";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import * as DocumentPicker from "expo-document-picker";
+import { Alert, Platform } from "react-native";
+import { User } from "@/types/user";
+import { IOUTransaction } from "@/types/transaction";
+
+// ── Types ──────────────────────────────────────────────────────────────
+
+export type BackupData = {
+  appVersion: string;
+  version: number;
+  date: string;
+  users: User[];
+  iouTransactions: IOUTransaction[];
+};
+
+// ── Helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Assemble the full backup payload from the database.
+ */
+export async function createBackupPayload(): Promise<BackupData> {
+  const usersData = await db.select().from(usersTable);
+  const iouTxData = await db.select().from(iouTransactions);
+
+  return {
+    appVersion: APP_VERSION,
+    version: 1, // schema version — kept for backwards compatibility
+    date: new Date().toISOString(),
+    users: usersData,
+    iouTransactions: iouTxData,
+  };
+}
+
+/**
+ * Export the backup to a file using platform-specific APIs.
+ * Android → Storage Access Framework  |  iOS → share sheet
+ */
+export async function exportBackup(): Promise<void> {
+  const backupData = await createBackupPayload();
+  const jsonString = JSON.stringify(backupData, null, 2);
+
+  if (Platform.OS === "android") {
+    const permissions =
+      await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+    if (permissions.granted) {
+      const uri = await FileSystem.StorageAccessFramework.createFileAsync(
+        permissions.directoryUri,
+        `iou_backup_v${APP_VERSION}_${new Date().toISOString().split("T")[0]}.json`,
+        "application/json"
+      );
+
+      await FileSystem.writeAsStringAsync(uri, jsonString, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+      Alert.alert("Success", "Backup saved successfully!");
+    }
+    // User cancelled permission — do nothing
+  } else {
+    // iOS / other platforms
+    const fileUri =
+      FileSystem.documentDirectory + `iou_backup_v${APP_VERSION}.json`;
+    await FileSystem.writeAsStringAsync(fileUri, jsonString);
+
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(fileUri);
+    } else {
+      Alert.alert("Error", "Sharing is not available on this device");
+    }
+  }
+}
+
+/**
+ * Let the user pick a JSON file and parse + validate it as a BackupData.
+ * Returns `null` if the user cancels.
+ */
+export async function parseBackupFile(): Promise<BackupData | null> {
+  const result = await DocumentPicker.getDocumentAsync({
+    type: "application/json",
+    copyToCacheDirectory: true,
+  });
+
+  if (result.canceled) return null;
+
+  const fileUri = result.assets[0].uri;
+  const fileContent = await FileSystem.readAsStringAsync(fileUri);
+
+  let data: any;
+  try {
+    data = JSON.parse(fileContent);
+  } catch {
+    throw new Error("Invalid JSON file");
+  }
+
+  if (!data.users || !data.iouTransactions) {
+    throw new Error("Invalid backup file format");
+  }
+
+  return data as BackupData;
+}
+
+/**
+ * Wipe existing data and restore from the given backup payload.
+ */
+export async function restoreBackup(data: BackupData): Promise<void> {
+  await db.delete(iouTransactions).run();
+  await db.delete(usersTable).run();
+
+  if (data.users.length > 0) {
+    await db.insert(usersTable).values(data.users).run();
+  }
+  if (data.iouTransactions.length > 0) {
+    await db.insert(iouTransactions).values(data.iouTransactions).run();
+  }
+}
+
+/**
+ * Delete all users and transactions.
+ */
+export async function wipeAllData(): Promise<void> {
+  await db.delete(iouTransactions).run();
+  await db.delete(usersTable).run();
+}
