@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AntDesign, MaterialCommunityIcons, Feather, MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -113,8 +113,8 @@ export default function AddUser() {
   return (
     <SafeAreaView className="bg-black flex-1">
       {/* Header */}
-      <View className="w-full h-16 bg-[#121317] flex-row items-center px-6 justify-between">
-        <TouchableOpacity
+        <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4 justify-between">
+          <TouchableOpacity
           onPress={() => router.back()}
           className="flex-row items-center gap-2"
         >
@@ -138,13 +138,13 @@ export default function AddUser() {
         >
           {/* Profile Section */}
           <View className="items-center gap-4 w-full py-16">
-            <View className="bg-[#121317] h-60 w-60 rounded-full overflow-hidden">
-              <TouchableOpacity
-                onPress={handlePickImage}
-                onLongPress={() => setSelectedImage(null)}
-                className="w-full h-full justify-center items-center"
-              >
-                {selectedImage ? (
+            <View className="bg-[#111] border border-[#222] h-40 w-40 rounded-full overflow-hidden justify-center items-center">
+              {selectedImage ? (
+                <TouchableOpacity
+                  onPress={handlePickImage}
+                  onLongPress={() => setSelectedImage(null)}
+                  className="w-full h-full justify-center items-center"
+                >
                   <Image
                     key={selectedImage}
                     source={{ uri: selectedImage }}
@@ -152,46 +152,43 @@ export default function AddUser() {
                     onError={(e) => {}
                     }
                   />
-                ) : (
-                  <MaterialCommunityIcons
-                    name="camera-plus"
-                    size={32}
-                    color="#aaa"
-                  />
-                )}
-              </TouchableOpacity>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={handlePickImage}
+                  onLongPress={() => setSelectedImage(null)}
+                  className="w-full h-full justify-center items-center"
+                >
+                  <Feather name="camera" size={32} color="#aaa" />
+                </TouchableOpacity>
+              )}
             </View>
 
-            <View className="gap-2 w-full px-8">
-              <Text className="text-white font-semibold px-2">Name</Text>
+            <View className="w-full mt-6 flex-row items-center border-b border-[#222] py-2 px-8">
+              <Text className="text-gray-500 font-bold tracking-widest uppercase text-xs w-20">Name</Text>
               <TextInput
-                className="w-full p-4 bg-[#121317] text-white rounded-lg"
-                placeholder="Enter name"
-                placeholderTextColor="gray"
                 value={name}
                 onChangeText={setName}
+                placeholder="Name"
+                placeholderTextColor="#666"
+                className="flex-1 text-white text-[16px] py-2"
               />
             </View>
 
-            <View className="gap-2 w-full px-8">
-              <Text className="text-white font-semibold px-2">UPI ID</Text>
-              <View className="flex-row items-center gap-2">
-                <TextInput
-                  className="flex-1 p-4 bg-[#121317] text-white rounded-lg"
-                  placeholder="name@upi"
-                  placeholderTextColor="gray"
-                  value={upiId}
-                  onChangeText={setUpiId}
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-                <TouchableOpacity
-                  className="bg-[#121317] p-4 rounded-lg"
-                  onPress={handleOpenScanner}
-                >
-                  <MaterialIcons name="qr-code-scanner" size={24} color="white" />
-                </TouchableOpacity>
-              </View>
+            <View className="w-full mt-4 flex-row items-center border-b border-[#222] py-2 px-8">
+              <Text className="text-gray-500 font-bold tracking-widest uppercase text-xs w-20">UPI ID</Text>
+              <TextInput
+                value={upiId}
+                onChangeText={setUpiId}
+                placeholder="optional@upi"
+                placeholderTextColor="#666"
+                className="flex-1 text-white text-[16px] py-2"
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+              <TouchableOpacity onPress={handleOpenScanner}>
+                <MaterialCommunityIcons name="qrcode-scan" size={24} color="#aaa" />
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -211,10 +208,9 @@ export default function AddUser() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* QR Scanner Modal */}
       <Modal visible={scannerVisible} animationType="slide">
         <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-          <View className="w-full h-16 bg-[#121317] flex-row items-center px-6">
+          <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4">
             <TouchableOpacity
               onPress={() => setScannerVisible(false)}
               className="flex-row items-center gap-2"

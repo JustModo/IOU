@@ -85,12 +85,14 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
         <Animated.View
           style={{
             transform: [{ translateX: clampedTranslateX }],
-            padding: 16,
+            paddingVertical: 16,
+            paddingHorizontal: 20,
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "flex-start",
-            borderRadius: 10,
-            overflow: "hidden",
+            borderBottomWidth: 1,
+            borderBottomColor: "#222",
+            backgroundColor: "black",
           }}
         >
           <View className="max-w-[80%]">

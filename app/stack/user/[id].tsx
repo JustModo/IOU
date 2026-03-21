@@ -75,7 +75,7 @@ export default function UserScreen() {
   return (
     <SafeAreaView className="bg-black flex-1">
       {/* Header */}
-      <View className="w-full h-16 bg-[#121317] flex-row items-center px-6 justify-between">
+      <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4 justify-between">
         <TouchableOpacity
           onPress={() => router.back()}
           className="flex-row items-center gap-2"
@@ -109,19 +109,21 @@ export default function UserScreen() {
       </View>
 
       {/* Profile Section */}
-      <View className="p-4 py-8 flex-row items-center">
-        <View className="bg-[#121317] h-28 w-28 rounded-full overflow-hidden justify-center items-center">
-          {data.pfp ? (
+      <View className="p-4 py-8 flex-row items-center border-b border-[#222]">
+        <View className="bg-[#111] border border-[#222] h-28 w-28 rounded-full overflow-hidden justify-center items-center">
+          {data?.pfp ? (
             <Image source={{ uri: data.pfp }} className="w-full h-full" />
           ) : (
             <Ionicons name="person-sharp" color="gray" size={42} />
           )}
         </View>
 
-        <View className="flex-1 items-end justify-end">
+        <View className="flex-1 items-end justify-end px-2">
           <Text
             className="font-light text-3xl"
             style={statusColor(status)}
+            numberOfLines={1}
+            adjustsFontSizeToFit
           >
             {display}
           </Text>
@@ -140,7 +142,7 @@ export default function UserScreen() {
       </View>
 
       {/* Scrollable Content */}
-      <GestureHandlerRootView>
+      <GestureHandlerRootView className="flex-1">
         <ScrollView className="flex-1">
           {isLoading ? (
             <Text className="text-white text-center py-4">
@@ -164,51 +166,54 @@ export default function UserScreen() {
       </GestureHandlerRootView>
 
       {/* Bottom Button Section */}
-      <View className="w-full bg-[#121317] flex-row justify-between overflow-visible h-14 items-end rounded-2xl">
-        <TouchableOpacity
-          className="flex-1 h-full justify-center"
-          onPress={() =>
-            router.push({
-              pathname: `/stack/transaction/transactionform`,
-              params: {
-                type: repayMode ? "repay" : "oweme",
-                id: data.id,
-                mode: "insert",
-              },
-            })
-          }
-        >
-          <Text className="text-white text-center text-lg font-semibold">
-            {repayMode ? "Got Back" : "Lent"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="w-20 h-16 bg-[#1e1f23] justify-center items-center rounded-t-xl"
-          onPress={() => setRepayMode((prev) => !prev)}
-        >
-          <MaterialCommunityIcons
-            name={repayMode ? "cash-minus" : "cash-plus"}
-            size={32}
-            color="white"
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="flex-1 h-full justify-center"
-          onPress={() =>
-            router.push({
-              pathname: `/stack/transaction/transactionform`,
-              params: {
-                type: repayMode ? "repaid" : "oweyou",
-                id: data.id,
-                mode: "insert",
-              },
-            })
-          }
-        >
-          <Text className="text-white text-center text-lg font-semibold">
-            {repayMode ? "Paid Back" : "Borrowed"}
-          </Text>
-        </TouchableOpacity>
+      <View className="mb-4">
+        <View className="bg-[#121317] flex-row justify-between overflow-visible h-14 items-end rounded-2xl mx-1 w-[98%] self-center">
+          <TouchableOpacity
+            className="flex-1 h-full justify-center active:opacity-75"
+            onPress={() =>
+              router.push({
+                pathname: `/stack/transaction/transactionform`,
+                params: {
+                  type: repayMode ? "repay" : "oweme",
+                  id: data.id,
+                  mode: "insert",
+                },
+              })
+            }
+          >
+            <Text className="text-white text-center text-lg font-semibold">
+              {repayMode ? "Got Back" : "Lent"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="w-20 h-16 bg-[#1e1f23] justify-center items-center rounded-t-xl active:opacity-75"
+            onPress={() => setRepayMode((prev) => !prev)}
+            style={{ marginBottom: -1 }}
+          >
+            <MaterialCommunityIcons
+              name={repayMode ? "cash-minus" : "cash-plus"}
+              size={36}
+              color="white"
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            className="flex-1 h-full justify-center active:opacity-75"
+            onPress={() =>
+              router.push({
+                pathname: `/stack/transaction/transactionform`,
+                params: {
+                  type: repayMode ? "repaid" : "oweyou",
+                  id: data.id,
+                  mode: "insert",
+                },
+              })
+            }
+          >
+            <Text className="text-white text-center text-lg font-semibold">
+              {repayMode ? "Paid Back" : "Borrowed"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <UpiQrModal

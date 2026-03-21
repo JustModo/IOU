@@ -21,7 +21,7 @@ export default function IOU() {
   }, [searchText, users]);
 
   return (
-    <SafeAreaView className="flex-1 justify-center items-center bg-black">
+    <SafeAreaView className="flex-1 bg-black w-full">
       <TitleBar
         searchText={searchText}
         setSearchText={setSearchText}
@@ -42,7 +42,7 @@ export default function IOU() {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingVertical: 20 }}
+        contentContainerStyle={{ paddingVertical: 10 }}
       >
         {filteredUsers.length > 0 ? (
           filteredUsers.map((user) => <UserTab key={user.id} user={user} />)

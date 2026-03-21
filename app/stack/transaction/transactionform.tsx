@@ -92,34 +92,34 @@ export default function AddTransaction() {
   return (
     <SafeAreaView className="bg-black flex-1">
       {/* Header */}
-      <View className="w-full h-16 bg-[#121317] flex-row items-center px-6 justify-between">
+      <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4 justify-between">
         <TouchableOpacity
           onPress={() => router.back()}
           className="flex-row items-center gap-2"
         >
           <AntDesign name="left" size={24} color="white" />
-          <Text className="text-white font-semibold text-lg">Back</Text>
+          <Text className="text-white font-semibold text-[15px]">Back</Text>
         </TouchableOpacity>
         {mode === "update" && (
-            <TouchableOpacity onPress={handleDelete}>
-            <Feather name="trash-2" size={24} color="red" />
+            <TouchableOpacity onPress={handleDelete} className="p-2">
+            <Feather name="trash-2" size={20} color="#ff4444" />
             </TouchableOpacity>
         )}
       </View>
 
-      <View className="flex-1 bg-black items-center justify-center px-8 gap-12">
-        <Text className="text-white font-light text-6xl text-center">
+      <View className="flex-1 bg-black items-center justify-start pt-8 pb-4 px-4">
+        <Text className="text-white text-[28px] font-bold tracking-widest uppercase mb-12">
           {setting.title}
         </Text>
 
         {/* Input Section */}
-        <View className="w-full flex gap-4">
-          <View className="w-full flex-row items-center justify-center">
-            <Text className="text-white text-7xl">₹</Text>
+        <View className="w-full flex-1">
+          <View className="w-full flex-row items-center justify-center border-b border-[#222] pb-6 mb-6">
+            <Text className="text-white text-6xl">₹</Text>
             <TextInput
               ref={amountInputRef}
-              className="p-4 text-white rounded-lg text-center text-7xl bg-transparent min-w-[100]"
-              placeholderTextColor="gray"
+              className="text-white text-center text-6xl bg-transparent min-w-[120px]"
+              placeholderTextColor="#333"
               keyboardType="decimal-pad"
               placeholder="0"
               maxLength={6}
@@ -130,12 +130,12 @@ export default function AddTransaction() {
           </View>
 
           {selectedType !== "repay" && selectedType !== "repaid" && (
-            <View className="w-full">
-              <Text className="text-white font-semibold mb-2 px-2">Notes</Text>
+            <View className="w-full mt-2 flex-row items-center border-b border-[#222] py-2">
+              <Text className="text-gray-500 font-bold tracking-widest uppercase text-xs w-20">Note</Text>
               <TextInput
-                className="w-full p-4 bg-[#121317] text-white rounded-lg text-lg"
-                placeholder="Enter notes"
-                placeholderTextColor="gray"
+                className="flex-1 text-white text-[16px] py-2"
+                placeholder="What was this for?"
+                placeholderTextColor="#666"
                 value={note}
                 onChangeText={setNote}
               />
@@ -144,8 +144,8 @@ export default function AddTransaction() {
 
           {/* Transaction Type Dropdown (Only in Update Mode) */}
           {mode === "update" && (
-            <View className="w-full">
-              <Text className="text-white font-semibold mb-2 px-2">
+            <View className="w-full mt-6">
+              <Text className="text-gray-500 font-bold tracking-widest uppercase text-xs mb-3">
                 Transaction Type
               </Text>
               <DropDownPicker
@@ -160,28 +160,31 @@ export default function AddTransaction() {
                   { label: "Paid Back", value: "repaid" },
                 ]}
                 containerStyle={{ height: 50 }}
-                style={{ backgroundColor: "#121317", borderWidth: 0 }}
+                style={{ backgroundColor: "black", borderColor: "#222", borderWidth: 1, borderRadius: 0 }}
                 dropDownContainerStyle={{
-                  backgroundColor: "#121317",
-                  borderWidth: 0,
+                  backgroundColor: "black",
+                  borderColor: "#222",
+                  borderWidth: 1,
+                  borderRadius: 0,
                 }}
-                labelStyle={{ color: "#fff" }}
-                textStyle={{ color: "#fff" }}
+                labelStyle={{ color: "#fff", fontSize: 15 }}
+                textStyle={{ color: "#fff", fontSize: 15 }}
                 placeholder="Select Transaction Type"
               />
             </View>
           )}
-        </View>
 
-        {/* Save / Update Button */}
-        <TouchableOpacity
-          className="w-full p-4 bg-[#121317] rounded-lg"
-          onPress={mode === "insert" ? handleInsert : handleUpdate}
-        >
-          <Text className="text-white text-xl text-center font-semibold">
-            {mode === "insert" ? "Save" : "Update"}
-          </Text>
-        </TouchableOpacity>
+          <View className="flex-1 justify-end pb-8">
+            <TouchableOpacity
+              className="w-full py-4 border border-white items-center active:bg-[#111]"
+              onPress={mode === "insert" ? handleInsert : handleUpdate}
+            >
+              <Text className="text-white text-[15px] text-center font-bold tracking-widest uppercase">
+                {mode === "insert" ? "SAVE" : "UPDATE"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       <ConfirmModal

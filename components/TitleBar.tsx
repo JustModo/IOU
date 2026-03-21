@@ -20,7 +20,7 @@ export default function TitleBar({
   const searchEnabled = searchText !== undefined && setSearchText !== undefined;
 
   return (
-    <View className="w-screen h-16 bg-[#121317] flex-row items-center px-6">
+    <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4">
       {searchEnabled && searchActive ? (
         <TextInput
           className="flex-1 text-white py-2 rounded-lg text-xl"
