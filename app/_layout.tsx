@@ -1,7 +1,7 @@
 import React from "react";
 import { Stack } from "expo-router";
 import * as SystemUI from "expo-system-ui";
-import "../global.css";
+import "./global.css";
 import { DBProvider } from "@/context/DBContext";
 
 export default function RootLayout() {

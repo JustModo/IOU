@@ -44,7 +44,7 @@ const DBContext = createContext<DBContextType | undefined>(undefined);
 export const DBProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
 
-  // ── Data refresh ────────────────────────────────────────────────────
+
   const fetchData = async (): Promise<void> => {
     try {
       const fetched = await userSvc.getAllUsers();
@@ -54,7 +54,7 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // ── User operations ─────────────────────────────────────────────────
+
   const insertUser = async (
     name: string,
     pfp: string | null
@@ -95,7 +95,7 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // ── Transaction operations ──────────────────────────────────────────
+
   const insertIouTransaction = async (
     userId: number,
     note: string,

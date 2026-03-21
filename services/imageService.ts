@@ -1,15 +1,8 @@
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 
-/**
- * Request gallery permissions, launch the image picker, and persist the
- * selected image to the app's document directory.
- *
- * @returns The local file URI of the saved image, or `null` if cancelled.
- */
 export async function pickAndSaveImage(): Promise<string | null> {
-  const { status } =
-    await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
   if (status !== "granted") {
     throw new Error("Permission to access gallery is required!");

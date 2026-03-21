@@ -5,41 +5,21 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { Alert, Platform } from "react-native";
-import { User } from "@/types/user";
-import { IOUTransaction } from "@/types/transaction";
+import { BackupData } from "@/types/backup";
+import { migrateToLatest } from "./backup/migrationEngine";
 
-// ── Types ──────────────────────────────────────────────────────────────
-
-export type BackupData = {
-  appVersion: string;
-  version: number;
-  date: string;
-  users: User[];
-  iouTransactions: IOUTransaction[];
-};
-
-// ── Helpers ────────────────────────────────────────────────────────────
-
-/**
- * Assemble the full backup payload from the database.
- */
 export async function createBackupPayload(): Promise<BackupData> {
   const usersData = await db.select().from(usersTable);
   const iouTxData = await db.select().from(iouTransactions);
 
   return {
-    appVersion: APP_VERSION,
-    version: 1, // schema version — kept for backwards compatibility
+    version: APP_VERSION,
     date: new Date().toISOString(),
     users: usersData,
     iouTransactions: iouTxData,
   };
 }
 
-/**
- * Export the backup to a file using platform-specific APIs.
- * Android → Storage Access Framework  |  iOS → share sheet
- */
 export async function exportBackup(): Promise<void> {
   const backupData = await createBackupPayload();
   const jsonString = JSON.stringify(backupData, null, 2);
@@ -60,9 +40,7 @@ export async function exportBackup(): Promise<void> {
       });
       Alert.alert("Success", "Backup saved successfully!");
     }
-    // User cancelled permission — do nothing
   } else {
-    // iOS / other platforms
     const fileUri =
       FileSystem.documentDirectory + `iou_backup_v${APP_VERSION}.json`;
     await FileSystem.writeAsStringAsync(fileUri, jsonString);
@@ -75,10 +53,6 @@ export async function exportBackup(): Promise<void> {
   }
 }
 
-/**
- * Let the user pick a JSON file and parse + validate it as a BackupData.
- * Returns `null` if the user cancels.
- */
 export async function parseBackupFile(): Promise<BackupData | null> {
   const result = await DocumentPicker.getDocumentAsync({
     type: "application/json",
@@ -90,23 +64,20 @@ export async function parseBackupFile(): Promise<BackupData | null> {
   const fileUri = result.assets[0].uri;
   const fileContent = await FileSystem.readAsStringAsync(fileUri);
 
-  let data: any;
+  let rawData: any;
   try {
-    data = JSON.parse(fileContent);
+    rawData = JSON.parse(fileContent);
   } catch {
     throw new Error("Invalid JSON file");
   }
 
-  if (!data.users || !data.iouTransactions) {
+  if (!rawData.users || !rawData.iouTransactions) {
     throw new Error("Invalid backup file format");
   }
 
-  return data as BackupData;
+  return migrateToLatest(rawData);
 }
 
-/**
- * Wipe existing data and restore from the given backup payload.
- */
 export async function restoreBackup(data: BackupData): Promise<void> {
   await db.delete(iouTransactions).run();
   await db.delete(usersTable).run();
@@ -119,9 +90,6 @@ export async function restoreBackup(data: BackupData): Promise<void> {
   }
 }
 
-/**
- * Delete all users and transactions.
- */
 export async function wipeAllData(): Promise<void> {
   await db.delete(iouTransactions).run();
   await db.delete(usersTable).run();
