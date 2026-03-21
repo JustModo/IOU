@@ -1,5 +1,5 @@
-import { APP_VERSION } from "@/constants/version";
 import { BackupData } from "@/types/backup";
+import { APP_VERSION } from "@/constants";
 import { MIGRATIONS } from "./migrations";
 
 export function detectVersion(raw: any): string {

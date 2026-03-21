@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import {
   AntDesign,
   Feather,
@@ -19,6 +19,7 @@ import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";
 import { getAmountStatus, formatAmount, statusColor } from "@/utils";
 import UpiQrModal from "@/components/UpiQrModal";
+import { appAlert } from "@/services/alertService";
 
 export default function UserScreen() {
   const router = useRouter();
@@ -88,7 +89,7 @@ export default function UserScreen() {
               if (data.upi_id) {
                 setQrVisible(true);
               } else {
-                Alert.alert("No UPI ID", "Set a UPI ID for this user in edit mode");
+                appAlert("No UPI ID", "Set a UPI ID for this user in edit mode");
               }
             }}
           >

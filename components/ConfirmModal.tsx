@@ -7,10 +7,11 @@ interface ConfirmModalProps {
   title: string;
   message: string;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   confirmText?: string;
   cancelText?: string;
   variant?: "danger" | "default";
+  isAlert?: boolean;
 }
 
 export default function ConfirmModal({
@@ -22,45 +23,48 @@ export default function ConfirmModal({
   confirmText = "Confirm",
   cancelText = "Cancel",
   variant = "danger",
+  isAlert = false,
 }: ConfirmModalProps) {
   return (
     <Modal
       animationType="fade"
       transparent={true}
       visible={visible}
-      onRequestClose={onCancel}
+      onRequestClose={onCancel || onConfirm}
     >
-      <View className="flex-1 justify-center items-center bg-black/70 px-4">
-        <View className="bg-[#121317] p-6 rounded-2xl w-full max-w-sm border border-gray-800">
-          <View className="items-center mb-4">
+      <View className="flex-1 justify-center items-center bg-black/80 px-4">
+        <View className="bg-black p-6 w-full max-w-sm border border-[#333]">
+          <View className="items-center mb-6">
             {variant === "danger" && (
-                <View className="w-12 h-12 rounded-full bg-red-900/30 items-center justify-center mb-4">
-                    <Feather name="alert-triangle" size={24} color="#f87171" />
+                <View className="mb-4">
+                    <Feather name="alert-triangle" size={32} color="#ff4444" />
                 </View>
             )}
-            <Text className="text-white text-xl font-bold text-center mb-2">
+            <Text className="text-white text-[17px] font-bold text-center mb-2 tracking-widest uppercase">
               {title}
             </Text>
-            <Text className="text-gray-400 text-center leading-5">
+            <Text className="text-gray-400 text-center text-[14px] leading-5">
               {message}
             </Text>
           </View>
 
           <View className="flex-row gap-3">
-            <TouchableOpacity
-              className="flex-1 py-3 bg-[#1e1f23] rounded-xl items-center"
-              onPress={onCancel}
-            >
-              <Text className="text-white font-semibold">{cancelText}</Text>
-            </TouchableOpacity>
+            {!isAlert && (
+              <TouchableOpacity
+                className="flex-1 py-3 border border-[#333] items-center"
+                onPress={onCancel}
+              >
+                <Text className="text-white font-medium text-[15px]">{cancelText}</Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
-              className={`flex-1 py-3 rounded-xl items-center ${
-                variant === "danger" ? "bg-red-600" : "bg-blue-600"
+              className={`flex-1 py-3 items-center ${
+                variant === "danger" ? "bg-[#ff4444]" : "bg-white"
               }`}
               onPress={onConfirm}
             >
-              <Text className="text-white font-semibold">{confirmText}</Text>
+              <Text className={`font-medium text-[15px] ${variant === "danger" ? "text-white" : "text-black"}`}>{isAlert && confirmText === "Confirm" ? "OK" : confirmText}</Text>
             </TouchableOpacity>
           </View>
         </View>

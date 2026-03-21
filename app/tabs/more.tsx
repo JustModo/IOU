@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, Alert, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
 import ConfirmModal from "@/components/ConfirmModal";
 import * as backupService from "@/services/backupService";
+import { APP_VERSION } from "@/constants";
+import { appAlert } from "@/services/alertService";
 
 export default function More() {
   const { fetchData } = useDB();
@@ -31,7 +33,7 @@ export default function More() {
       await backupService.exportBackup();
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Failed to export data");
+      appAlert("Error", "Failed to export data");
     } finally {
       setLoading(false);
     }
@@ -51,10 +53,10 @@ export default function More() {
             await backupService.restoreBackup(data);
             await fetchData();
             setModalVisible(false);
-            Alert.alert("Success", "Data restored successfully");
+            appAlert("Success", "Data restored successfully");
           } catch (e) {
             console.error(e);
-            Alert.alert("Error", "Failed to restore data");
+            appAlert("Error", "Failed to restore data");
           } finally {
             setLoading(false);
           }
@@ -63,7 +65,7 @@ export default function More() {
       );
     } catch (error: any) {
       console.error(error);
-      Alert.alert("Error", error?.message || "Failed to import file");
+      appAlert("Error", error?.message || "Failed to import file");
     }
   };
 
@@ -77,10 +79,10 @@ export default function More() {
           await backupService.wipeAllData();
           await fetchData();
           setModalVisible(false);
-          Alert.alert("Success", "App data wiped successfully");
+          appAlert("Success", "App data wiped successfully");
         } catch (e) {
           console.error(e);
-          Alert.alert("Error", "Failed to wipe data");
+          appAlert("Error", "Failed to wipe data");
         } finally {
           setLoading(false);
         }
@@ -91,69 +93,81 @@ export default function More() {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <TitleBar
+      <TitleBar title="Settings" />
 
-        title="MORE"
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
       >
+        <View className="items-center mt-6 mb-2">
+          <Image source={require("@/assets/images/icon.png")} className="w-24 h-24 rounded-3xl" />
+        </View>
 
-      </TitleBar>
-
-      <ScrollView className="flex-1 p-4">
-        <Text className="text-gray-500 text-sm font-semibold mb-4 ml-2 uppercase">Data Management</Text>
-
-        <View className="bg-[#121317] rounded-xl overflow-hidden mb-8">
+        <Text className="text-gray-500 text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Data & Storage</Text>
+        
+        <View className="border-t border-b border-[#222]">
           <TouchableOpacity
-            className="flex-row items-center p-4 border-b border-gray-800 active:bg-gray-900"
+            className="flex-row items-center p-3 active:bg-[#111]"
             onPress={handleExport}
             disabled={loading}
           >
-            <View className="w-10 h-10 rounded-full bg-blue-900/30 items-center justify-center mr-4">
-              <Feather name="upload" size={20} color="#60a5fa" />
+            <Feather name="upload" size={20} color="white" className="mr-2 ml-1" />
+            <View className="flex-1 ml-2">
+              <Text className="text-white text-[15px] font-medium">Backup Data</Text>
+              <Text className="text-gray-500 text-xs mt-0.5">Export to JSON file</Text>
             </View>
-            <View className="flex-1">
-              <Text className="text-white text-lg font-medium">Backup Data</Text>
-              <Text className="text-gray-400 text-sm">Export your data to a JSON file</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#666" />
+            <MaterialIcons name="chevron-right" size={20} color="#666" />
           </TouchableOpacity>
 
+          <View className="h-[1px] bg-[#222] ml-11" />
+
           <TouchableOpacity
-            className="flex-row items-center p-4 active:bg-gray-900"
+            className="flex-row items-center p-3 active:bg-[#111]"
             onPress={handleImport}
             disabled={loading}
           >
-            <View className="w-10 h-10 rounded-full bg-green-900/30 items-center justify-center mr-4">
-              <Feather name="download" size={20} color="#4ade80" />
+            <Feather name="download" size={20} color="white" className="mr-2 ml-1" />
+            <View className="flex-1 ml-2">
+              <Text className="text-white text-[15px] font-medium">Restore Data</Text>
+              <Text className="text-gray-500 text-xs mt-0.5">Import from backup</Text>
             </View>
-            <View className="flex-1">
-              <Text className="text-white text-lg font-medium">Restore Data</Text>
-              <Text className="text-gray-400 text-sm">Import data from a backup file</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#666" />
+            <MaterialIcons name="chevron-right" size={20} color="#666" />
           </TouchableOpacity>
         </View>
 
-        <Text className="text-gray-500 text-sm font-semibold mb-4 ml-2 uppercase">Danger Zone</Text>
-
-        <View className="bg-[#121317] rounded-xl overflow-hidden mb-8">
+        <Text className="text-gray-500 text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Danger Zone</Text>
+        
+        <View className="border-t border-b border-[#222]">
           <TouchableOpacity
-            className="flex-row items-center p-4 active:bg-gray-900"
+            className="flex-row items-center p-3 active:bg-[#111]"
             onPress={handleWipe}
             disabled={loading}
           >
-            <View className="w-10 h-10 rounded-full bg-red-900/30 items-center justify-center mr-4">
-              <Feather name="trash-2" size={20} color="#f87171" />
+            <Feather name="trash-2" size={20} color="#ff4444" className="mr-2 ml-1" />
+            <View className="flex-1 ml-2">
+              <Text className="text-[#ff4444] text-[15px] font-medium">Wipe All Data</Text>
+              <Text className="text-gray-500 text-xs mt-0.5">Permanently delete everything</Text>
             </View>
-            <View className="flex-1">
-              <Text className="text-red-400 text-lg font-medium">Wipe All Data</Text>
-              <Text className="text-gray-400 text-sm">Permanently delete all app data</Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#666" />
           </TouchableOpacity>
         </View>
 
+        <Text className="text-gray-500 text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">About</Text>
+        
+        <View className="border-t border-b border-[#222] bg-black">
+          <View className="flex-row justify-between items-center p-3">
+            <Text className="text-white text-[15px] ml-1">Developer</Text>
+            <Text className="text-gray-400 text-[15px]">JustModo</Text>
+          </View>
+          <View className="h-[1px] bg-[#222] ml-4" />
+          <View className="flex-row justify-between items-center p-3">
+            <Text className="text-white text-[15px] ml-1">Version</Text>
+            <Text className="text-gray-400 text-[15px]">{APP_VERSION}</Text>
+          </View>
+        </View>
+
         {loading && (
-          <Text className="text-center text-gray-500 mt-4">Processing...</Text>
+          <Text className="text-center text-gray-400 mt-6 text-sm">Processing...</Text>
         )}
       </ScrollView>
 

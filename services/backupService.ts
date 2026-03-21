@@ -1,11 +1,12 @@
 import { db } from "@/db";
 import { usersTable, iouTransactions } from "@/db/schema";
-import { APP_VERSION } from "@/constants/version";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import { Alert, Platform } from "react-native";
+import { Platform } from "react-native";
 import { BackupData } from "@/types/backup";
+import { APP_VERSION } from "@/constants";
+import { appAlert } from "@/services/alertService";
 import { migrateToLatest } from "./backup/migrationEngine";
 
 export async function createBackupPayload(): Promise<BackupData> {
@@ -38,7 +39,7 @@ export async function exportBackup(): Promise<void> {
       await FileSystem.writeAsStringAsync(uri, jsonString, {
         encoding: FileSystem.EncodingType.UTF8,
       });
-      Alert.alert("Success", "Backup saved successfully!");
+      appAlert("Success", "Backup saved successfully!");
     }
   } else {
     const fileUri =
@@ -48,7 +49,7 @@ export async function exportBackup(): Promise<void> {
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(fileUri);
     } else {
-      Alert.alert("Error", "Sharing is not available on this device");
+      appAlert("Error", "Sharing is not available on this device");
     }
   }
 }

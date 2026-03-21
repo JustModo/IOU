@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { AntDesign, MaterialCommunityIcons, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Alert, Image, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
 import { pickAndSaveImage } from "@/services/imageService";
 import ConfirmModal from "@/components/ConfirmModal";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { appAlert } from "@/services/alertService";
 
 export default function AddUser() {
   const router = useRouter();
@@ -80,7 +81,7 @@ export default function AddUser() {
     if (!cameraPermission?.granted) {
       const result = await requestCameraPermission();
       if (!result.granted) {
-        Alert.alert("Permission required", "Camera access is needed to scan QR codes");
+        appAlert("Permission required", "Camera access is needed to scan QR codes");
         return;
       }
     }
@@ -105,7 +106,7 @@ export default function AddUser() {
     if (raw.includes("@")) {
       setUpiId(raw);
     } else {
-      Alert.alert("Invalid QR", "Could not find a UPI ID in this QR code");
+      appAlert("Invalid QR", "Could not find a UPI ID in this QR code");
     }
   };
 

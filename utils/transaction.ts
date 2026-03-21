@@ -6,8 +6,8 @@ export const TRANSACTION_TYPE_MAP: Record<
 > = {
   oweme: { title: "Lent", mul: 1 },
   oweyou: { title: "Borrowed", mul: -1 },
-  repay: { title: "Got Back", mul: 1 },
-  repaid: { title: "Paid Back", mul: -1 },
+  repay: { title: "Got Back", mul: -1 },
+  repaid: { title: "Paid Back", mul: 1 },
 };
 
 export function normalizeTransactionAmount(amount: number, type: TransactionType): number {

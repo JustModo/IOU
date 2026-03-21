@@ -1,8 +1,9 @@
 import React from "react";
-import { Alert, Modal, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { appAlert } from "@/services/alertService";
 
 interface QrScannerModalProps {
   visible: boolean;
@@ -17,7 +18,7 @@ export default function QrScannerModal({ visible, onClose, onScanned }: QrScanne
     if (!cameraPermission?.granted) {
       const result = await requestCameraPermission();
       if (!result.granted) {
-        Alert.alert("Permission required", "Camera access is needed to scan QR codes");
+        appAlert("Permission required", "Camera access is needed to scan QR codes");
         onClose();
       }
     }
@@ -38,7 +39,7 @@ export default function QrScannerModal({ visible, onClose, onScanned }: QrScanne
     if (raw.includes("@")) {
       onScanned(raw);
     } else {
-      Alert.alert("Invalid QR", "Could not find a UPI ID in this QR code");
+      appAlert("Invalid QR", "Could not find a UPI ID in this QR code");
     }
   };
 
