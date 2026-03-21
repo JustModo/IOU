@@ -35,22 +35,6 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="bill"
-        options={{
-          headerShown: false,
-          title: "Bills",
-          tabBarIcon: ({ focused, color, size }) => {
-            return (
-              <MaterialCommunityIcons
-                name="format-page-split"
-                size={size}
-                color={color}
-              />
-            );
-          },
-        }}
-      />
-      <Tabs.Screen
         name="more"
         options={{
           headerShown: false,

@@ -4,8 +4,7 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { db } from "@/db";
-import { usersTable, iouTransactions, billTable, billTransactions } from "@/db/schema";
-import { sql } from "drizzle-orm";
+import { usersTable, iouTransactions } from "@/db/schema";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
@@ -36,8 +35,6 @@ export default function More() {
       setLoading(true);
       const usersData = await db.select().from(usersTable);
       const iouTxData = await db.select().from(iouTransactions);
-      const billsData = await db.select().from(billTable);
-      const billTxData = await db.select().from(billTransactions);
 
       const backupData = {
         appVersion: APP_VERSION,
@@ -45,8 +42,6 @@ export default function More() {
         date: new Date().toISOString(),
         users: usersData,
         iouTransactions: iouTxData,
-        bills: billsData,
-        billTransactions: billTxData,
       };
       
       // ... existing export logic
@@ -112,7 +107,7 @@ export default function More() {
       // const backupVersion = data.appVersion || "unknown";
       // console.log("Restoring backup from version:", backupVersion);
 
-      if (!data.users || !data.iouTransactions || !data.bills || !data.billTransactions) {
+      if (!data.users || !data.iouTransactions) {
         Alert.alert("Error", "Invalid backup file format");
         return;
       }
@@ -125,16 +120,12 @@ export default function More() {
               try {
                 setLoading(true);
                 // Wipe existing data
-                await db.delete(billTransactions).run();
-                await db.delete(billTable).run();
                 await db.delete(iouTransactions).run();
                 await db.delete(usersTable).run();
 
                 // Insert new data
                 if (data.users.length > 0) await db.insert(usersTable).values(data.users).run();
                 if (data.iouTransactions.length > 0) await db.insert(iouTransactions).values(data.iouTransactions).run();
-                if (data.bills.length > 0) await db.insert(billTable).values(data.bills).run();
-                if (data.billTransactions.length > 0) await db.insert(billTransactions).values(data.billTransactions).run();
                 
                 await fetchData();
                 setModalVisible(false);
@@ -161,8 +152,6 @@ export default function More() {
         async () => {
             try {
               setLoading(true);
-              await db.delete(billTransactions).run();
-              await db.delete(billTable).run();
               await db.delete(iouTransactions).run();
               await db.delete(usersTable).run();
               await fetchData();
