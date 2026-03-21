@@ -15,4 +15,14 @@ export const MIGRATIONS: BackupMigration[] = [
       return { ...rest, version: "1.1.0" };
     },
   },
+  // 1.1.0 → 1.2.0: add upi_id field to users
+  {
+    fromVersion: "1.1.0",
+    toVersion: "1.2.0",
+    migrate: (data: any) => ({
+      ...data,
+      version: "1.2.0",
+      users: data.users.map((u: any) => ({ ...u, upi_id: u.upi_id ?? null })),
+    }),
+  },
 ];

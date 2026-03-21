@@ -43,6 +43,13 @@
       "when": 1774051200000,
       "tag": "0005_brisk_sparrow",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1774120022192,
+      "tag": "0006_yellow_sasquatch",
+      "breakpoints": true
     }
   ]
 }

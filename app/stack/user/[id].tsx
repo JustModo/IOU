@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import {
   AntDesign,
   Feather,
   Ionicons,
   MaterialCommunityIcons,
+  MaterialIcons,
 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TransactionTab from "@/components/TransactionTab";
@@ -17,6 +18,7 @@ import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";
 import { getAmountStatus, formatAmount, statusColor } from "@/utils";
+import UpiQrModal from "@/components/UpiQrModal";
 
 export default function UserScreen() {
   const router = useRouter();
@@ -29,6 +31,7 @@ export default function UserScreen() {
   );
   const [isLoading, setIsLoading] = useState(false);
   const [repayMode, setRepayMode] = useState(false);
+  const [qrVisible, setQrVisible] = useState(false);
 
   const userId = typeof id === "string" ? Number(id) : null;
 
@@ -79,16 +82,29 @@ export default function UserScreen() {
           <AntDesign name="left" size={24} color="white" />
           <Text className="text-white font-semibold text-lg">Back</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "/stack/user/userform",
-              params: { mode: "update", user: JSON.stringify(data) },
-            })
-          }
-        >
-          <Feather name="edit-2" size={22} color="white" />
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-4">
+          <TouchableOpacity
+            onPress={() => {
+              if (data.upi_id) {
+                setQrVisible(true);
+              } else {
+                Alert.alert("No UPI ID", "Set a UPI ID for this user in edit mode");
+              }
+            }}
+          >
+            <MaterialIcons name="qr-code" size={22} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "/stack/user/userform",
+                params: { mode: "update", user: JSON.stringify(data) },
+              })
+            }
+          >
+            <Feather name="edit-2" size={22} color="white" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Profile Section */}
@@ -193,6 +209,13 @@ export default function UserScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      <UpiQrModal
+        visible={qrVisible}
+        name={data.name}
+        upiId={data.upi_id || ""}
+        onClose={() => setQrVisible(false)}
+      />
     </SafeAreaView>
   );
 }

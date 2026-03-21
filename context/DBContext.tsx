@@ -16,11 +16,12 @@ type DBContextType = {
   users: User[];
   setUsers: Dispatch<SetStateAction<User[]>>;
   fetchData: () => Promise<void>;
-  insertUser: (name: string, pfp: string | null) => Promise<boolean>;
+  insertUser: (name: string, pfp: string | null, upiId: string | null) => Promise<boolean>;
   updateUser: (
     id: number,
     name: string,
-    pfp: string | null
+    pfp: string | null,
+    upiId: string | null
   ) => Promise<boolean>;
   deleteUser: (id: number) => Promise<boolean>;
   insertIouTransaction: (
@@ -57,10 +58,11 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
 
   const insertUser = async (
     name: string,
-    pfp: string | null
+    pfp: string | null,
+    upiId: string | null
   ): Promise<boolean> => {
     try {
-      await userSvc.insertUser(name, pfp);
+      await userSvc.insertUser(name, pfp, upiId);
       await fetchData();
       return true;
     } catch (error) {
@@ -72,10 +74,11 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
   const updateUser = async (
     id: number,
     name: string,
-    pfp: string | null
+    pfp: string | null,
+    upiId: string | null
   ): Promise<boolean> => {
     try {
-      await userSvc.updateUser(id, name, pfp);
+      await userSvc.updateUser(id, name, pfp, upiId);
       await fetchData();
       return true;
     } catch (error) {

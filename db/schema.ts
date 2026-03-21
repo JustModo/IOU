@@ -6,6 +6,7 @@ export const usersTable = sqliteTable("users_table", {
   name: text("name").notNull(),
   amount: integer("amount").notNull(),
   pfp: text("pfp"),
+  upi_id: text("upi_id"),
 });
 
 export const iouTransactions = sqliteTable("iou_transactions", {

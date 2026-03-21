@@ -7,12 +7,12 @@ export async function getAllUsers(): Promise<User[]> {
   return db.select().from(usersTable).all();
 }
 
-export async function insertUser(name: string, pfp: string | null): Promise<void> {
-  await db.insert(usersTable).values({ name, amount: 0, pfp }).run();
+export async function insertUser(name: string, pfp: string | null, upiId: string | null): Promise<void> {
+  await db.insert(usersTable).values({ name, amount: 0, pfp, upi_id: upiId }).run();
 }
 
-export async function updateUser(id: number, name: string, pfp: string | null): Promise<void> {
-  await db.update(usersTable).set({ name, pfp }).where(eq(usersTable.id, id)).run();
+export async function updateUser(id: number, name: string, pfp: string | null, upiId: string | null): Promise<void> {
+  await db.update(usersTable).set({ name, pfp, upi_id: upiId }).where(eq(usersTable.id, id)).run();
 }
 
 export async function deleteUser(id: number): Promise<void> {
