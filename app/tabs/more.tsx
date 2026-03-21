@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image } from "react-native";
+import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, Linking } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
 import ConfirmModal from "@/components/ConfirmModal";
 import * as backupService from "@/services/backupService";
-import { APP_VERSION } from "@/constants";
+import { APP_VERSION, DEVELOPER_NAME, GITHUB_RELEASES_URL, GITHUB_REPO_NAME } from "@/constants";
 import { appAlert } from "@/services/alertService";
+import { checkForUpdates } from "@/services/updateService";
 
 export default function More() {
   const { fetchData } = useDB();
@@ -157,13 +158,32 @@ export default function More() {
         <View className="border-t border-b border-[#222] bg-black">
           <View className="flex-row justify-between items-center p-3">
             <Text className="text-white text-[15px] ml-1">Developer</Text>
-            <Text className="text-gray-400 text-[15px]">JustModo</Text>
+            <Text className="text-gray-400 text-[15px]">{DEVELOPER_NAME}</Text>
           </View>
+          <View className="h-[1px] bg-[#222] ml-4" />
+          <TouchableOpacity 
+            className="flex-row justify-between items-center p-3 active:bg-[#111]"
+            onPress={() => Linking.openURL(GITHUB_RELEASES_URL)}
+          >
+            <Text className="text-white text-[15px] ml-1">GitHub</Text>
+            <View className="flex-row items-center">
+              <Text className="text-blue-400 text-[15px] mr-1">{GITHUB_REPO_NAME}</Text>
+              <Feather name="external-link" size={14} color="#60A5FA" />
+            </View>
+          </TouchableOpacity>
           <View className="h-[1px] bg-[#222] ml-4" />
           <View className="flex-row justify-between items-center p-3">
             <Text className="text-white text-[15px] ml-1">Version</Text>
             <Text className="text-gray-400 text-[15px]">{APP_VERSION}</Text>
           </View>
+          <View className="h-[1px] bg-[#222] ml-4" />
+          <TouchableOpacity 
+            className="flex-row justify-between items-center p-3 active:bg-[#111]"
+            onPress={() => checkForUpdates(false)}
+          >
+            <Text className="text-white text-[15px] ml-1">Check For Updates</Text>
+            <MaterialIcons name="autorenew" size={20} color="#666" />
+          </TouchableOpacity>
         </View>
 
         {loading && (

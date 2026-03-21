@@ -1,8 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { checkForUpdates } from "@/services/updateService";
 
 export default function Layout() {
+  useEffect(() => {
+    checkForUpdates(true);
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
