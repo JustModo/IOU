@@ -24,13 +24,13 @@ export function getAmountStatus(amount: number): Status {
   return amount > 0 ? "positive" : amount < 0 ? "negative" : "neutral";
 }
 
-export function statusColor(status: Status): string {
+export function statusColor(status: Status): { color: string } {
   switch (status) {
     case "positive":
-      return "text-green-500";
+      return { color: "#22c55e" };
     case "negative":
-      return "text-red-500";
+      return { color: "#ef4444" };
     default:
-      return "text-[#aaa]";
+      return { color: "#aaa" };
   }
 }

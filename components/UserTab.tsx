@@ -37,7 +37,8 @@ export default function UserTab({ user }: { user: User }) {
       {/* Right Side (Number) */}
       <View className="items-end justify-center pr-4 flex-1">
         <Text
-          className={`font-light text-2xl ${statusColor(status)}`}
+          className="font-light text-2xl"
+          style={statusColor(status)}
         >
           {display}
         </Text>

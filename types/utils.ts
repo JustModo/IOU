@@ -1,3 +1,3 @@
 export type Status = "negative" | "positive" | "neutral";
 
-export type TransactionType = "oweme" | "oweyou" | "repay";
+export type TransactionType = "oweme" | "oweyou" | "repay" | "repaid";

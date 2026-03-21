@@ -28,6 +28,7 @@ export default function UserScreen() {
     null
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [repayMode, setRepayMode] = useState(false);
 
   const userId = typeof id === "string" ? Number(id) : null;
 
@@ -102,7 +103,8 @@ export default function UserScreen() {
 
         <View className="flex-1 items-end justify-end">
           <Text
-            className={`font-light text-3xl ${statusColor(status)}`}
+            className="font-light text-3xl"
+            style={statusColor(status)}
           >
             {display}
           </Text>
@@ -151,36 +153,43 @@ export default function UserScreen() {
           onPress={() =>
             router.push({
               pathname: `/stack/transaction/transactionform`,
-              params: { type: "oweme", id: data.id, mode: "insert" },
+              params: {
+                type: repayMode ? "repay" : "oweme",
+                id: data.id,
+                mode: "insert",
+              },
             })
           }
         >
           <Text className="text-white text-center text-lg font-semibold">
-            Owes Me
+            {repayMode ? "Got Back" : "Lent"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           className="w-20 h-16 bg-[#1e1f23] justify-center items-center rounded-t-xl"
-          onPress={() =>
-            router.push({
-              pathname: `/stack/transaction/transactionform`,
-              params: { type: "repay", id: data.id, mode: "insert" },
-            })
-          }
+          onPress={() => setRepayMode((prev) => !prev)}
         >
-          <MaterialCommunityIcons name="cash-plus" size={32} color="white" />
+          <MaterialCommunityIcons
+            name={repayMode ? "cash-minus" : "cash-plus"}
+            size={32}
+            color="white"
+          />
         </TouchableOpacity>
         <TouchableOpacity
           className="flex-1 h-full justify-center"
           onPress={() =>
             router.push({
               pathname: `/stack/transaction/transactionform`,
-              params: { type: "oweyou", id: data.id, mode: "insert" },
+              params: {
+                type: repayMode ? "repaid" : "oweyou",
+                id: data.id,
+                mode: "insert",
+              },
             })
           }
         >
           <Text className="text-white text-center text-lg font-semibold">
-            Owe You
+            {repayMode ? "Paid Back" : "Borrowed"}
           </Text>
         </TouchableOpacity>
       </View>

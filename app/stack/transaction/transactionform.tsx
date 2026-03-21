@@ -19,7 +19,7 @@ export default function AddTransaction() {
     transaction?: string;
   };
 
-  const [amount, setAmount] = useState("");
+  const amountRef = useRef("");
   const [note, setNote] = useState("");
   const [selectedType, setSelectedType] = useState<TransactionType>("repay");
   const [open, setOpen] = useState(false);
@@ -35,11 +35,11 @@ export default function AddTransaction() {
   useEffect(() => {
     if (mode === "update" && transaction) {
       const parsedTransaction: IOUTransaction = JSON.parse(transaction);
-      setAmount(Math.abs(parsedTransaction.amount).toString());
+      amountRef.current = Math.abs(parsedTransaction.amount).toString();
       setTransactionId(parsedTransaction.id);
       setNote(parsedTransaction.note);
       setSelectedType(parsedTransaction.type as TransactionType);
-      if (parsedTransaction.type === "repay") setNote("Repaid");
+      if (parsedTransaction.type === "repay" || parsedTransaction.type === "repaid") setNote("Repaid");
     } else {
       setSelectedType(type);
     }
@@ -52,8 +52,8 @@ export default function AddTransaction() {
       return;
     }
     const parsedID = parseInt(id, 10);
-    const parsedAmount = amount.trim() === "" ? 0 : parseFloat(amount);
-    const updatedNote = selectedType === "repay" ? "Repaid" : note;
+    const parsedAmount = amountRef.current.trim() === "" ? 0 : parseFloat(amountRef.current);
+    const updatedNote = selectedType === "repay" || selectedType === "repaid" ? "Repaid" : note;
     const res = await insertIouTransaction(
       parsedID,
       updatedNote,
@@ -67,9 +67,9 @@ export default function AddTransaction() {
     if (!id || Array.isArray(id)) {
       return;
     }
-    const parsedAmount = amount.trim() === "" ? 0 : parseFloat(amount);
+    const parsedAmount = amountRef.current.trim() === "" ? 0 : parseFloat(amountRef.current);
     const normalAmount = normalizeTransactionAmount(parsedAmount, selectedType);
-    const updatedNote = selectedType === "repay" ? "Repaid" : note;
+    const updatedNote = selectedType === "repay" || selectedType === "repaid" ? "Repaid" : note;
     const res = await updateIouTransaction(
       transactionId,
       updatedNote,
@@ -120,20 +120,16 @@ export default function AddTransaction() {
               ref={amountInputRef}
               className="p-4 text-white rounded-lg text-center text-7xl bg-transparent min-w-[100]"
               placeholderTextColor="gray"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               placeholder="0"
               maxLength={6}
               autoFocus
-              onChangeText={(text) => {
-                if (/^\d*\.?\d{0,5}$/.test(text) && !/^0\d/.test(text)) {
-                  setAmount(text);
-                }
-              }}
-              value={amount}
+              defaultValue={amountRef.current}
+              onChangeText={(text) => { amountRef.current = text; }}
             />
           </View>
 
-          {selectedType !== "repay" && (
+          {selectedType !== "repay" && selectedType !== "repaid" && (
             <View className="w-full">
               <Text className="text-white font-semibold mb-2 px-2">Notes</Text>
               <TextInput
@@ -158,9 +154,10 @@ export default function AddTransaction() {
                 setOpen={setOpen}
                 setValue={setSelectedType}
                 items={[
-                  { label: "You Owe Me", value: "oweme" },
-                  { label: "I Owe You", value: "oweyou" },
-                  { label: "Repay", value: "repay" },
+                  { label: "Lent", value: "oweme" },
+                  { label: "Borrowed", value: "oweyou" },
+                  { label: "Got Back", value: "repay" },
+                  { label: "Paid Back", value: "repaid" },
                 ]}
                 containerStyle={{ height: 50 }}
                 style={{ backgroundColor: "#121317", borderWidth: 0 }}

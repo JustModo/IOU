@@ -102,7 +102,8 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
             </Text>
           </View>
           <Text
-            className={`font-light text-2xl ${statusColor(status)}`}
+            className="font-light text-2xl"
+            style={statusColor(status)}
           >
             {display}
           </Text>
