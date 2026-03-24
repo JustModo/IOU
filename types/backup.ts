@@ -11,3 +11,28 @@ export type BackupData = {
   users: User[];
   iouTransactions: IOUTransaction[];
 };
+
+export type BackupImageAsset = {
+  fileName: string;
+  mimeType: string;
+  dataBase64: string;
+};
+
+export type BackupSections = {
+  profilePictures?: Record<string, BackupImageAsset>;
+  [key: string]: unknown;
+};
+
+export type BackupFilePayload = {
+  format: "iou-backup";
+  version: string;
+  date: string;
+  data: BackupData;
+  sections: BackupSections;
+  profilePictures?: Record<string, BackupImageAsset>;
+};
+
+export type BackupImportPayload = {
+  data: BackupData;
+  sections: BackupSections;
+};

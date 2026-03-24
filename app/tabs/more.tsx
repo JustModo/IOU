@@ -156,12 +156,11 @@ export default function More() {
 
         <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">About</Text>
         
-        <View className="border-t border-b border-border bg-background">
+        <View className="border-t border-border bg-background">
           <View className="flex-row justify-between items-center p-3">
             <Text className="text-foreground text-[15px] ml-1">Developer</Text>
             <Text className="text-muted-foreground text-[15px]">{DEVELOPER_NAME}</Text>
           </View>
-          <View className="h-[1px] bg-border ml-4" />
           <TouchableOpacity 
             className="flex-row justify-between items-center p-3 active:bg-muted"
             onPress={() => Linking.openURL(GITHUB_RELEASES_URL)}
@@ -172,12 +171,10 @@ export default function More() {
               <Feather name="external-link" size={14} color={COLORS.link} />
             </View>
           </TouchableOpacity>
-          <View className="h-[1px] bg-border ml-4" />
           <View className="flex-row justify-between items-center p-3">
             <Text className="text-foreground text-[15px] ml-1">Version</Text>
             <Text className="text-muted-foreground text-[15px]">{APP_VERSION}</Text>
           </View>
-          <View className="h-[1px] bg-border ml-4" />
           <TouchableOpacity 
             className="flex-row justify-between items-center p-3 active:bg-muted"
             onPress={() => checkForUpdates(false)}
