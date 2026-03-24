@@ -1,4 +1,5 @@
 import { Status } from "@/types/utils";
+import { COLORS } from "@/constants";
 
 export function formatDateToDisplay(isoString: string): string {
   const date = new Date(isoString);
@@ -27,10 +28,10 @@ export function getAmountStatus(amount: number): Status {
 export function statusColor(status: Status): { color: string } {
   switch (status) {
     case "positive":
-      return { color: "#22c55e" };
+      return { color: COLORS.success };
     case "negative":
-      return { color: "#ef4444" };
+      return { color: COLORS.destructiveStrong };
     default:
-      return { color: "#aaa" };
+      return { color: COLORS.mutedForeground };
   }
 }

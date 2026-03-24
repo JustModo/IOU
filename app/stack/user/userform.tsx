@@ -9,6 +9,7 @@ import { pickAndSaveImage } from "@/services/imageService";
 import ConfirmModal from "@/components/ConfirmModal";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { appAlert } from "@/services/alertService";
+import { COLORS } from "@/constants";
 
 export default function AddUser() {
   const router = useRouter();
@@ -111,19 +112,19 @@ export default function AddUser() {
   };
 
   return (
-    <SafeAreaView className="bg-black flex-1">
+    <SafeAreaView className="bg-background flex-1">
       {/* Header */}
-        <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4 justify-between">
+        <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4 justify-between">
           <TouchableOpacity
           onPress={() => router.back()}
           className="flex-row items-center gap-2"
         >
-          <AntDesign name="left" size={24} color="white" />
-          <Text className="text-white font-semibold text-lg">Back</Text>
+          <AntDesign name="left" size={24} color={COLORS.foreground} />
+          <Text className="text-foreground font-semibold text-lg">Back</Text>
         </TouchableOpacity>
         {mode === "update" && (
              <TouchableOpacity onPress={handleDelete}>
-                <Feather name="trash-2" size={24} color="red" />
+                <Feather name="trash-2" size={24} color={COLORS.destructive} />
              </TouchableOpacity>
         )}
       </View>
@@ -138,7 +139,7 @@ export default function AddUser() {
         >
           {/* Profile Section */}
           <View className="items-center gap-4 w-full py-16">
-            <View className="bg-[#111] border border-[#222] h-40 w-40 rounded-full overflow-hidden justify-center items-center">
+            <View className="bg-muted border border-border h-40 w-40 rounded-full overflow-hidden justify-center items-center">
               {selectedImage ? (
                 <TouchableOpacity
                   onPress={handlePickImage}
@@ -159,48 +160,48 @@ export default function AddUser() {
                   onLongPress={() => setSelectedImage(null)}
                   className="w-full h-full justify-center items-center"
                 >
-                  <Feather name="camera" size={32} color="#aaa" />
+                  <Feather name="camera" size={32} color={COLORS.mutedForeground} />
                 </TouchableOpacity>
               )}
             </View>
 
-            <View className="w-full mt-6 flex-row items-center border-b border-[#222] py-2 px-8">
-              <Text className="text-gray-500 font-bold tracking-widest uppercase text-xs w-20">Name</Text>
+            <View className="w-full mt-6 flex-row items-center border-b border-border py-2 px-8">
+              <Text className="text-subtle font-bold tracking-widest uppercase text-xs w-20">Name</Text>
               <TextInput
                 value={name}
                 onChangeText={setName}
                 placeholder="Name"
-                placeholderTextColor="#666"
-                className="flex-1 text-white text-[16px] py-2"
+                placeholderTextColor={COLORS.subtle}
+                className="flex-1 text-foreground text-[16px] py-2"
               />
             </View>
 
-            <View className="w-full mt-4 flex-row items-center border-b border-[#222] py-2 px-8">
-              <Text className="text-gray-500 font-bold tracking-widest uppercase text-xs w-20">UPI ID</Text>
+            <View className="w-full mt-4 flex-row items-center border-b border-border py-2 px-8">
+              <Text className="text-subtle font-bold tracking-widest uppercase text-xs w-20">UPI ID</Text>
               <TextInput
                 value={upiId}
                 onChangeText={setUpiId}
                 placeholder="optional@upi"
-                placeholderTextColor="#666"
-                className="flex-1 text-white text-[16px] py-2"
+                placeholderTextColor={COLORS.subtle}
+                className="flex-1 text-foreground text-[16px] py-2"
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
               <TouchableOpacity onPress={handleOpenScanner}>
-                <MaterialCommunityIcons name="qrcode-scan" size={24} color="#aaa" />
+                <MaterialCommunityIcons name="qrcode-scan" size={24} color={COLORS.mutedForeground} />
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Save Button */}
           <TouchableOpacity
-            className="w-full p-4 bg-[#121317] rounded-lg"
+            className="w-full p-4 bg-card rounded-lg"
             onPress={mode === "insert" ? handleInsert : handleUpdate}
             disabled={!name.trim()}
           >
             <Text
-              className="text-white text-xl text-center font-semibold"
-              style={{ color: name.trim() ? "white" : "#aaa" }}
+              className="text-foreground text-xl text-center font-semibold"
+              style={{ color: name.trim() ? COLORS.foreground : COLORS.mutedForeground }}
             >
               {mode === "insert" ? "Save" : "Update"}
             </Text>
@@ -209,14 +210,14 @@ export default function AddUser() {
       </KeyboardAvoidingView>
 
       <Modal visible={scannerVisible} animationType="slide">
-        <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-          <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4">
+        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+          <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4">
             <TouchableOpacity
               onPress={() => setScannerVisible(false)}
               className="flex-row items-center gap-2"
             >
-              <AntDesign name="left" size={24} color="white" />
-              <Text className="text-white font-semibold text-lg">Cancel</Text>
+              <AntDesign name="left" size={24} color={COLORS.foreground} />
+              <Text className="text-foreground font-semibold text-lg">Cancel</Text>
             </TouchableOpacity>
           </View>
           <CameraView

@@ -13,11 +13,11 @@ export default function UserTab({ user }: { user: User }) {
   return (
     <TouchableOpacity
       onPress={() => router.push(`/stack/user/${user.id}`)}
-      className="w-full flex-row items-center border-b border-[#222] bg-black active:bg-[#111]"
+      className="w-full flex-row items-center border-b border-border bg-background active:bg-muted"
     >
       {/* Left Side (Avatar + Name) */}
       <View className="flex-row items-center gap-4 py-2 pl-4 flex-1">
-        <View className="bg-[#111] border border-[#222] h-16 w-16 rounded-full overflow-hidden justify-center items-center">
+        <View className="bg-muted border border-border h-16 w-16 rounded-full overflow-hidden justify-center items-center">
           {user.pfp ? (
             <Image source={{ uri: user.pfp }} className="w-full h-full" />
           ) : (
@@ -25,7 +25,7 @@ export default function UserTab({ user }: { user: User }) {
           )}
         </View>
         <Text
-          className="text-white text-xl flex-1"
+          className="text-foreground text-xl flex-1"
           numberOfLines={1}
           ellipsizeMode="tail"
         >

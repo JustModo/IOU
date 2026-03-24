@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { checkForUpdates } from "@/services/updateService";
+import { COLORS } from "@/constants";
 
 export default function Layout() {
   useEffect(() => {
@@ -13,15 +14,15 @@ export default function Layout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#121317",
-          borderColor: "#1E1E1E",
+          backgroundColor: COLORS.card,
+          borderColor: COLORS.border,
           height: 65,
         },
         tabBarLabelStyle: {
           fontSize: 14,
         },
-        tabBarActiveTintColor: "#fff",
-        tabBarInactiveTintColor: "#aaa",
+        tabBarActiveTintColor: COLORS.foreground,
+        tabBarInactiveTintColor: COLORS.mutedForeground,
       }}
     >
       <Tabs.Screen

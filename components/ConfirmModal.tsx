@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Text, TouchableOpacity, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { COLORS } from "@/constants";
 
 interface ConfirmModalProps {
   visible: boolean;
@@ -32,18 +33,18 @@ export default function ConfirmModal({
       visible={visible}
       onRequestClose={onCancel || onConfirm}
     >
-      <View className="flex-1 justify-center items-center bg-black/80 px-4">
-        <View className="bg-black p-6 w-full max-w-sm border border-[#333]">
+      <View className="flex-1 justify-center items-center px-4" style={{ backgroundColor: COLORS.overlay }}>
+        <View className="bg-background p-6 w-full max-w-sm border border-input">
           <View className="items-center mb-6">
             {variant === "danger" && (
                 <View className="mb-4">
-                    <Feather name="alert-triangle" size={32} color="#ff4444" />
+                    <Feather name="alert-triangle" size={32} color={COLORS.destructive} />
                 </View>
             )}
-            <Text className="text-white text-[17px] font-bold text-center mb-2 tracking-widest uppercase">
+            <Text className="text-foreground text-[17px] font-bold text-center mb-2 tracking-widest uppercase">
               {title}
             </Text>
-            <Text className="text-gray-400 text-center text-[14px] leading-5">
+            <Text className="text-muted-foreground text-center text-[14px] leading-5">
               {message}
             </Text>
           </View>
@@ -51,20 +52,20 @@ export default function ConfirmModal({
           <View className="flex-row gap-3">
             {!isAlert && (
               <TouchableOpacity
-                className="flex-1 py-3 border border-[#333] items-center"
+                className="flex-1 py-3 border border-input items-center"
                 onPress={onCancel}
               >
-                <Text className="text-white font-medium text-[15px]">{cancelText}</Text>
+                <Text className="text-foreground font-medium text-[15px]">{cancelText}</Text>
               </TouchableOpacity>
             )}
 
             <TouchableOpacity
               className={`flex-1 py-3 items-center ${
-                variant === "danger" ? "bg-[#ff4444]" : "bg-white"
+                variant === "danger" ? "bg-destructive" : "bg-foreground"
               }`}
               onPress={onConfirm}
             >
-              <Text className={`font-medium text-[15px] ${variant === "danger" ? "text-white" : "text-black"}`}>{isAlert && confirmText === "Confirm" ? "OK" : confirmText}</Text>
+              <Text className={`font-medium text-[15px] ${variant === "danger" ? "text-destructive-foreground" : "text-background"}`}>{isAlert && confirmText === "Confirm" ? "OK" : confirmText}</Text>
             </TouchableOpacity>
           </View>
         </View>

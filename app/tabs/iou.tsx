@@ -8,6 +8,7 @@ import { User } from "@/types/user";
 import { useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import { filterUsers, sortUsers } from "@/utils";
+import { COLORS } from "@/constants";
 
 export default function IOU() {
   const { users } = useDB();
@@ -21,7 +22,7 @@ export default function IOU() {
   }, [searchText, users]);
 
   return (
-    <SafeAreaView className="flex-1 bg-black w-full">
+    <SafeAreaView className="flex-1 bg-background w-full">
       <TitleBar
         searchText={searchText}
         setSearchText={setSearchText}
@@ -36,18 +37,17 @@ export default function IOU() {
           }
           className="ml-6"
         >
-          <AntDesign name="adduser" size={24} color="white" />
+          <AntDesign name="adduser" size={24} color={COLORS.foreground} />
         </TouchableOpacity>
       </TitleBar>
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingVertical: 10 }}
       >
         {filteredUsers.length > 0 ? (
           filteredUsers.map((user) => <UserTab key={user.id} user={user} />)
         ) : (
-          <Text className="text-gray-400 text-center p-4">
+          <Text className="text-muted-foreground text-center p-4">
             {users.length === 0
               ? "No users found. Add your first user!"
               : "No matching users found."}

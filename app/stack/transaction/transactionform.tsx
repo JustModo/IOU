@@ -1,7 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { AntDesign, Feather } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDB } from "@/context/DBContext";
@@ -9,6 +17,7 @@ import { TransactionType } from "@/types/utils";
 import { IOUTransaction } from "@/types/transaction";
 import ConfirmModal from "@/components/ConfirmModal";
 import { TRANSACTION_TYPE_MAP, normalizeTransactionAmount } from "@/utils";
+import { COLORS } from "@/constants";
 
 export default function AddTransaction() {
   const router = useRouter();
@@ -90,62 +99,76 @@ export default function AddTransaction() {
   };
 
   return (
-    <SafeAreaView className="bg-black flex-1">
+    <SafeAreaView className="bg-background flex-1">
       {/* Header */}
-      <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4 justify-between">
+      <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4 justify-between">
         <TouchableOpacity
           onPress={() => router.back()}
           className="flex-row items-center gap-2"
         >
-          <AntDesign name="left" size={24} color="white" />
-          <Text className="text-white font-semibold text-[15px]">Back</Text>
+          <AntDesign name="left" size={24} color={COLORS.foreground} />
+          <Text className="text-foreground font-semibold text-[15px]">Back</Text>
         </TouchableOpacity>
         {mode === "update" && (
             <TouchableOpacity onPress={handleDelete} className="p-2">
-            <Feather name="trash-2" size={20} color="#ff4444" />
+            <Feather name="trash-2" size={20} color={COLORS.destructive} />
             </TouchableOpacity>
         )}
       </View>
 
-      <View className="flex-1 bg-black items-center justify-start pt-8 pb-4 px-4">
-        <Text className="text-white text-[28px] font-bold tracking-widest uppercase mb-12">
-          {setting.title}
-        </Text>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          className="flex-1 bg-background"
+          contentContainerStyle={{
+            paddingTop: 32,
+            paddingBottom: 24,
+            paddingHorizontal: 16,
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text className="text-foreground text-[28px] font-bold tracking-widest uppercase mb-12 text-center">
+            {setting.title}
+          </Text>
 
-        {/* Input Section */}
-        <View className="w-full flex-1">
-          <View className="w-full flex-row items-center justify-center border-b border-[#222] pb-6 mb-6">
-            <Text className="text-white text-6xl">₹</Text>
+          <View className="w-full flex-row items-center justify-center border-b border-border pb-6 mb-6">
+            <Text className="text-foreground text-6xl">₹</Text>
             <TextInput
               ref={amountInputRef}
-              className="text-white text-center text-6xl bg-transparent min-w-[120px]"
-              placeholderTextColor="#333"
+              className="text-foreground text-center text-6xl bg-transparent min-w-[120px]"
+              placeholderTextColor={COLORS.input}
               keyboardType="decimal-pad"
               placeholder="0"
               maxLength={6}
               autoFocus
               defaultValue={amountRef.current}
-              onChangeText={(text) => { amountRef.current = text; }}
+              onChangeText={(text) => {
+                amountRef.current = text;
+              }}
             />
           </View>
 
           {selectedType !== "repay" && selectedType !== "repaid" && (
-            <View className="w-full mt-2 flex-row items-center border-b border-[#222] py-2">
-              <Text className="text-gray-500 font-bold tracking-widest uppercase text-xs w-20">Note</Text>
+            <View className="w-full mt-2 flex-row items-center border-b border-border py-2">
+              <Text className="text-subtle font-bold tracking-widest uppercase text-xs w-20">Note</Text>
               <TextInput
-                className="flex-1 text-white text-[16px] py-2"
+                className="flex-1 text-foreground text-[16px] py-2"
                 placeholder="What was this for?"
-                placeholderTextColor="#666"
+                placeholderTextColor={COLORS.subtle}
                 value={note}
                 onChangeText={setNote}
               />
             </View>
           )}
 
-          {/* Transaction Type Dropdown (Only in Update Mode) */}
           {mode === "update" && (
-            <View className="w-full mt-6">
-              <Text className="text-gray-500 font-bold tracking-widest uppercase text-xs mb-3">
+            <View
+              className="w-full mt-6"
+              style={{ zIndex: 2000, marginBottom: open ? 180 : 0 }}
+            >
+              <Text className="text-subtle font-bold tracking-widest uppercase text-xs mb-3">
                 Transaction Type
               </Text>
               <DropDownPicker
@@ -160,32 +183,38 @@ export default function AddTransaction() {
                   { label: "Paid Back", value: "repaid" },
                 ]}
                 containerStyle={{ height: 50 }}
-                style={{ backgroundColor: "black", borderColor: "#222", borderWidth: 1, borderRadius: 0 }}
-                dropDownContainerStyle={{
-                  backgroundColor: "black",
-                  borderColor: "#222",
+                style={{
+                  backgroundColor: COLORS.background,
+                  borderColor: COLORS.border,
                   borderWidth: 1,
                   borderRadius: 0,
                 }}
-                labelStyle={{ color: "#fff", fontSize: 15 }}
-                textStyle={{ color: "#fff", fontSize: 15 }}
+                dropDownContainerStyle={{
+                  backgroundColor: COLORS.background,
+                  borderColor: COLORS.border,
+                  borderWidth: 1,
+                  borderRadius: 0,
+                }}
+                labelStyle={{ color: COLORS.foreground, fontSize: 15 }}
+                textStyle={{ color: COLORS.foreground, fontSize: 15 }}
+                listMode="SCROLLVIEW"
                 placeholder="Select Transaction Type"
               />
             </View>
           )}
 
-          <View className="flex-1 justify-end pb-8">
+          <View className="w-full mt-10 pb-4" style={{ zIndex: 1 }}>
             <TouchableOpacity
-              className="w-full py-4 border border-white items-center active:bg-[#111]"
+              className="w-full py-4 border border-foreground items-center active:bg-muted"
               onPress={mode === "insert" ? handleInsert : handleUpdate}
             >
-              <Text className="text-white text-[15px] text-center font-bold tracking-widest uppercase">
+              <Text className="text-foreground text-[15px] text-center font-bold tracking-widest uppercase">
                 {mode === "insert" ? "SAVE" : "UPDATE"}
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
       <ConfirmModal
         visible={confirmVisible}

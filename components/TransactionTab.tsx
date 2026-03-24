@@ -9,6 +9,7 @@ import { useRef } from "react";
 import { IOUTransaction } from "@/types/transaction";
 import { useRouter } from "expo-router";
 import { formatDateToDisplay, formatAmount, getAmountStatus, statusColor } from "@/utils";
+import { COLORS } from "@/constants";
 
 type TransactionTabProps = {
   transaction: IOUTransaction;
@@ -91,15 +92,15 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
             justifyContent: "space-between",
             alignItems: "flex-start",
             borderBottomWidth: 1,
-            borderBottomColor: "#222",
-            backgroundColor: "black",
+            borderBottomColor: COLORS.border,
+            backgroundColor: COLORS.background,
           }}
         >
           <View className="max-w-[80%]">
-            <Text className="text-lg text-white">
+            <Text className="text-lg text-foreground">
               {transaction.note !== "" ? transaction.note : "Note"}
             </Text>
-            <Text className="text-sm text-[#aaa]">
+            <Text className="text-sm text-muted-foreground">
               {formatDateToDisplay(transaction.date)}
             </Text>
           </View>
@@ -114,7 +115,7 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
           style={{ position: "absolute", right: 20, opacity }}
           className={"flex-1 h-full justify-center"}
         >
-          <Feather name="edit-2" size={20} color="#aaa" />
+          <Feather name="edit-2" size={20} color={COLORS.mutedForeground} />
         </Animated.View>
       </View>
     </PanGestureHandler>

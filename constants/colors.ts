@@ -1,0 +1,16 @@
+export const COLORS = {
+  background: "#000000",
+  foreground: "#ffffff",
+  card: "#121317",
+  accent: "#1e1f23",
+  muted: "#111111",
+  border: "#222222",
+  input: "#333333",
+  mutedForeground: "#aaaaaa",
+  subtle: "#666666",
+  destructive: "#ff4444",
+  destructiveStrong: "#ef4444",
+  success: "#22c55e",
+  link: "#60A5FA",
+  overlay: "rgba(0, 0, 0, 0.8)",
+} as const;

@@ -20,6 +20,7 @@ import { IOUTransaction } from "@/types/transaction";
 import { getAmountStatus, formatAmount, statusColor } from "@/utils";
 import UpiQrModal from "@/components/UpiQrModal";
 import { appAlert } from "@/services/alertService";
+import { COLORS } from "@/constants";
 
 export default function UserScreen() {
   const router = useRouter();
@@ -61,8 +62,8 @@ export default function UserScreen() {
 
   if (!data) {
     return (
-      <SafeAreaView className="bg-black flex-1 justify-center items-center">
-        <Text className="text-white text-lg">
+      <SafeAreaView className="bg-background flex-1 justify-center items-center">
+        <Text className="text-foreground text-lg">
           {isLoading ? "Loading..." : "User not found"}
         </Text>
       </SafeAreaView>
@@ -73,17 +74,17 @@ export default function UserScreen() {
   const { display } = formatAmount(data.amount);
 
   return (
-    <SafeAreaView className="bg-black flex-1">
+    <SafeAreaView className="bg-background flex-1">
       {/* Header */}
-      <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4 justify-between">
+      <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4 justify-between">
         <TouchableOpacity
           onPress={() => router.back()}
           className="flex-row items-center gap-2"
         >
-          <AntDesign name="left" size={24} color="white" />
-          <Text className="text-white font-semibold text-lg">Back</Text>
+          <AntDesign name="left" size={24} color={COLORS.foreground} />
+          <Text className="text-foreground font-semibold text-lg">Back</Text>
         </TouchableOpacity>
-        <View className="flex-row items-center gap-4">
+        <View className="flex-row items-center gap-8">
           <TouchableOpacity
             onPress={() => {
               if (data.upi_id) {
@@ -93,7 +94,7 @@ export default function UserScreen() {
               }
             }}
           >
-            <MaterialIcons name="qr-code" size={22} color="white" />
+            <MaterialIcons name="qr-code" size={22} color={COLORS.foreground} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() =>
@@ -103,14 +104,14 @@ export default function UserScreen() {
               })
             }
           >
-            <Feather name="edit-2" size={22} color="white" />
+            <Feather name="edit-2" size={22} color={COLORS.foreground} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Profile Section */}
-      <View className="p-4 py-8 flex-row items-center border-b border-[#222]">
-        <View className="bg-[#111] border border-[#222] h-28 w-28 rounded-full overflow-hidden justify-center items-center">
+      <View className="p-4 py-8 flex-row items-center">
+        <View className="bg-muted border border-border h-28 w-28 rounded-full overflow-hidden justify-center items-center">
           {data?.pfp ? (
             <Image source={{ uri: data.pfp }} className="w-full h-full" />
           ) : (
@@ -128,7 +129,7 @@ export default function UserScreen() {
             {display}
           </Text>
           <Text
-            className="text-white text-4xl"
+            className="text-foreground text-4xl"
             numberOfLines={1}
             ellipsizeMode="tail"
           >
@@ -137,15 +138,15 @@ export default function UserScreen() {
         </View>
       </View>
 
-      <View className="px-4 py-2">
-        <Text className="text-white text-lg font-semibold">Details</Text>
+      <View className="px-4 py-2 border-b border-border">
+        <Text className="text-foreground text-lg font-semibold">Details</Text>
       </View>
 
       {/* Scrollable Content */}
       <GestureHandlerRootView className="flex-1">
         <ScrollView className="flex-1">
           {isLoading ? (
-            <Text className="text-white text-center py-4">
+            <Text className="text-foreground text-center py-4">
               Loading transactions...
             </Text>
           ) : transactions && transactions.length > 0 ? (
@@ -158,7 +159,7 @@ export default function UserScreen() {
                 />
               ))
           ) : (
-            <Text className="text-gray-400 text-center py-4">
+            <Text className="text-muted-foreground text-center py-4">
               No transactions found
             </Text>
           )}
@@ -167,7 +168,7 @@ export default function UserScreen() {
 
       {/* Bottom Button Section */}
       <View className="mb-4">
-        <View className="bg-[#121317] flex-row justify-between overflow-visible h-14 items-end rounded-2xl mx-1 w-[98%] self-center">
+        <View className="bg-card flex-row justify-between overflow-visible h-14 items-end rounded-2xl mx-1 w-[98%] self-center">
           <TouchableOpacity
             className="flex-1 h-full justify-center active:opacity-75"
             onPress={() =>
@@ -181,19 +182,19 @@ export default function UserScreen() {
               })
             }
           >
-            <Text className="text-white text-center text-lg font-semibold">
+            <Text className="text-foreground text-center text-lg font-semibold">
               {repayMode ? "Got Back" : "Lent"}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="w-20 h-16 bg-[#1e1f23] justify-center items-center rounded-t-xl active:opacity-75"
+            className="w-20 h-16 bg-accent justify-center items-center rounded-t-xl active:opacity-75"
             onPress={() => setRepayMode((prev) => !prev)}
             style={{ marginBottom: -1 }}
           >
             <MaterialCommunityIcons
               name={repayMode ? "cash-minus" : "cash-plus"}
               size={36}
-              color="white"
+              color={COLORS.foreground}
             />
           </TouchableOpacity>
           <TouchableOpacity
@@ -209,7 +210,7 @@ export default function UserScreen() {
               })
             }
           >
-            <Text className="text-white text-center text-lg font-semibold">
+            <Text className="text-foreground text-center text-lg font-semibold">
               {repayMode ? "Paid Back" : "Borrowed"}
             </Text>
           </TouchableOpacity>

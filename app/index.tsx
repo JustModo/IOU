@@ -26,10 +26,10 @@ export default function Index() {
 
   if (error) {
     return (
-      <View className="bg-black flex-1 justify-center items-center">
-        <Text className="text-white">Migration error: {error?.message}</Text>
+      <View className="bg-background flex-1 justify-center items-center">
+        <Text className="text-foreground">Migration error: {error?.message}</Text>
       </View>
     );
   }
-  return <View className="bg-black flex-1" />;
+  return <View className="bg-background flex-1" />;
 }

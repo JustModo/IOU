@@ -1,6 +1,7 @@
 import React, { ReactNode, useState } from "react";
 import { Text, View, TextInput, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { COLORS } from "@/constants";
 
 interface TitleBarProps {
   title: string;
@@ -20,18 +21,18 @@ export default function TitleBar({
   const searchEnabled = searchText !== undefined && setSearchText !== undefined;
 
   return (
-    <View className="w-full h-16 bg-black border-b border-[#222] flex-row items-center px-4">
+    <View className="w-full h-16 bg-card border-b border-border flex-row items-center px-4">
       {searchEnabled && searchActive ? (
         <TextInput
-          className="flex-1 text-white py-2 rounded-lg text-xl"
+          className="flex-1 text-foreground py-2 rounded-lg text-xl"
           placeholder="Search..."
-          placeholderTextColor="#aaa"
+          placeholderTextColor={COLORS.mutedForeground}
           value={searchText}
           onChangeText={setSearchText}
           autoFocus
         />
       ) : (
-        <Text className="text-white text-xl font-semibold flex-1 py-2">
+        <Text className="text-foreground text-xl font-semibold flex-1 py-2">
           {title}
         </Text>
       )}
@@ -47,7 +48,7 @@ export default function TitleBar({
           <Ionicons
             name={searchActive ? "close" : "search"}
             size={24}
-            color="white"
+            color={COLORS.foreground}
           />
         </Pressable>
       )}

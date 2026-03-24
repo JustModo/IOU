@@ -4,6 +4,7 @@ import { AntDesign } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { appAlert } from "@/services/alertService";
+import { COLORS } from "@/constants";
 
 interface QrScannerModalProps {
   visible: boolean;
@@ -45,14 +46,14 @@ export default function QrScannerModal({ visible, onClose, onScanned }: QrScanne
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose} onShow={handleOpen}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-        <View className="w-full h-16 bg-[#121317] flex-row items-center px-6">
+      <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+        <View className="w-full h-16 bg-card flex-row items-center px-6">
           <TouchableOpacity
             onPress={onClose}
             className="flex-row items-center gap-2"
           >
-            <AntDesign name="left" size={24} color="white" />
-            <Text className="text-white font-semibold text-lg">Cancel</Text>
+            <AntDesign name="left" size={24} color={COLORS.foreground} />
+            <Text className="text-foreground font-semibold text-lg">Cancel</Text>
           </TouchableOpacity>
         </View>
         <CameraView
