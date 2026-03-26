@@ -1,0 +1,29 @@
+services:
+  expo-builder:
+    build: .
+    container_name: expo-local-build
+    working_dir: /workspace
+    env_file:
+      - .env
+    volumes:
+      - .:/src:ro
+      - workspace:/workspace
+      - ./builds:/out
+      - gradle-cache:/root/.gradle
+      - npm-cache:/root/.npm
+    environment:
+      - ANDROID_SDK_ROOT=/opt/android-sdk
+      - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      - GRADLE_OPTS=-Dorg.gradle.daemon=true -Dorg.gradle.caching=true
+      - SRC_DIR=/src
+      - WORK_ROOT=/workspace
+      - OUTPUT_DIR=/out
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    command: ["bash", "/src/scripts/android/build-local.sh"]
+
+volumes:
+  workspace:
+  gradle-cache:
+  npm-cache:

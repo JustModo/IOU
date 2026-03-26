@@ -7,6 +7,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
+    "android:build:docker": "docker compose up --build --remove-orphans expo-builder",
+    "android:build:docker:clean": "docker compose down -v && docker compose up --build --remove-orphans expo-builder",
     "test": "jest --watchAll",
     "lint": "expo lint"
   },

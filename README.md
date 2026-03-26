@@ -13,3 +13,18 @@ A minimal, offline-first personal tracker for debts, loans, and shared bills. De
 ## Tech Stack
 
 Built with React Native (Expo), NativeWind, SQLite, and Drizzle ORM.
+
+## Container Android Build (No Local Eject)
+
+Use Docker Compose to build Android artifacts without generating `android/` or `ios/` in your local project.
+
+Before building, set signing values in `.env` (copy from `.env.example`).
+
+```bash
+docker compose up --build
+```
+
+- Source code is mounted read-only into the container.
+- Expo prebuild/eject and Gradle run inside a container volume (`/workspace`).
+- Final `*.apk` is exported to local `builds/`.
+- Caches are persisted via Docker volumes (`workspace`, `gradle-cache`, `npm-cache`) for faster repeat builds.
