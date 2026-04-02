@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
-import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { checkForUpdates } from "@/services/updateService";
 import { COLORS } from "@/constants";
 
@@ -14,12 +14,25 @@ export default function Layout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: COLORS.card,
+          backgroundColor: COLORS.background,
+          borderTopColor: COLORS.border,
+          borderTopWidth: 1,
           borderColor: COLORS.border,
-          height: 65,
+          height: 60,
+          paddingTop: 6,
+          paddingBottom: 6,
+          elevation: 0,
+          shadowOpacity: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 14,
+          fontSize: 11,
+          fontWeight: "500",
+        },
+        tabBarIconStyle: {
+          marginTop: 0,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 2,
         },
         tabBarActiveTintColor: COLORS.foreground,
         tabBarInactiveTintColor: COLORS.mutedForeground,
@@ -29,14 +42,8 @@ export default function Layout() {
         name="iou"
         options={{
           title: "IOU",
-          tabBarIcon: ({ focused, color, size }) => {
-            return (
-              <MaterialCommunityIcons
-                name="cash-multiple"
-                size={size}
-                color={color}
-              />
-            );
+          tabBarIcon: ({ color, size }) => {
+            return <Feather name="credit-card" size={size} color={color} />;
           },
         }}
       />
@@ -54,7 +61,7 @@ export default function Layout() {
         options={{
           headerShown: false,
           title: "More",
-          tabBarIcon: ({ focused, color, size }) => {
+          tabBarIcon: ({ color, size }) => {
             return <Feather name="more-horizontal" size={size} color={color} />;
           },
         }}

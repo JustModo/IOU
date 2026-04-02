@@ -21,10 +21,10 @@ export default function TitleBar({
   const searchEnabled = searchText !== undefined && setSearchText !== undefined;
 
   return (
-    <View className="w-full h-16 bg-card border-b border-border flex-row items-center px-4">
+    <View className="w-full h-14 bg-background border-b border-border flex-row items-center px-4">
       {searchEnabled && searchActive ? (
         <TextInput
-          className="flex-1 text-foreground py-2 rounded-lg text-xl"
+          className="flex-1 text-foreground py-2 text-base"
           placeholder="Search..."
           placeholderTextColor={COLORS.mutedForeground}
           value={searchText}
@@ -32,7 +32,7 @@ export default function TitleBar({
           autoFocus
         />
       ) : (
-        <Text className="text-foreground text-xl font-semibold flex-1 py-2">
+        <Text className="text-foreground text-lg font-medium flex-1 py-2">
           {title}
         </Text>
       )}
@@ -43,11 +43,11 @@ export default function TitleBar({
             setSearchText("");
             setSearchActive((prev) => !prev);
           }}
-          className="ml-4"
+          className="ml-3"
         >
           <Ionicons
             name={searchActive ? "close" : "search"}
-            size={24}
+            size={20}
             color={COLORS.foreground}
           />
         </Pressable>
