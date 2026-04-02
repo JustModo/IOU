@@ -18,7 +18,7 @@ export default function Index() {
       if (success) {
         await SplashScreen.hideAsync();
         await fetchData();
-        router.replace("/tabs/iou");
+        router.replace("/tabs/home");
       }
     }
     prepare();

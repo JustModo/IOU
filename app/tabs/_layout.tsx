@@ -41,6 +41,15 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
+        name="home"
+        options={{
+          title: "Home",
+          tabBarIcon: ({ color, size }) => {
+            return <Feather name="home" size={size} color={color} />;
+          },
+        }}
+      />
+      <Tabs.Screen
         name="more"
         options={{
           headerShown: false,
