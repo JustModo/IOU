@@ -1,18 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, Linking } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
 import ConfirmModal from "@/components/ConfirmModal";
 import * as backupService from "@/services/backupService";
+import {
+  DEFAULT_REMINDER_SETTINGS,
+  getReminderSettings,
+  refreshReminderSchedule,
+  updateReminderSettings,
+} from "@/services/notificationService";
+import { ReminderSettings } from "@/types/reminder";
 import { APP_VERSION, DEVELOPER_NAME, GITHUB_RELEASES_URL, GITHUB_REPO_NAME } from "@/constants";
 import { appAlert } from "@/services/alertService";
 import { checkForUpdates } from "@/services/updateService";
 import { COLORS } from "@/constants";
 
 export default function More() {
-  const { fetchData } = useDB();
+  const { users, fetchData } = useDB();
   const [loading, setLoading] = useState(false);
+  const [reminderBusy, setReminderBusy] = useState(false);
+  const [reminderSettings, setReminderSettings] =
+    useState<ReminderSettings>(DEFAULT_REMINDER_SETTINGS);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -27,6 +37,41 @@ export default function More() {
   const showConfirm = (title: string, message: string, onConfirm: () => Promise<void>, confirmText = "Confirm", variant: "danger" | "default" = "danger") => {
     setModalConfig({ title, message, onConfirm, confirmText, variant });
     setModalVisible(true);
+  };
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadReminderSettings = async () => {
+      const settings = await getReminderSettings();
+      if (mounted) {
+        setReminderSettings(settings);
+      }
+    };
+
+    void loadReminderSettings();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const applyReminderSettings = async (partial: Partial<ReminderSettings>) => {
+    const optimistic = { ...reminderSettings, ...partial };
+    setReminderSettings(optimistic);
+    setReminderBusy(true);
+
+    try {
+      const saved = await updateReminderSettings(partial, users);
+      setReminderSettings(saved);
+    } catch (error) {
+      console.error(error);
+      appAlert("Error", "Failed to update reminder settings");
+      const reloaded = await getReminderSettings();
+      setReminderSettings(reloaded);
+    } finally {
+      setReminderBusy(false);
+    }
   };
 
   const handleExport = async () => {
@@ -53,7 +98,8 @@ export default function More() {
           try {
             setLoading(true);
             await backupService.restoreBackup(data);
-            await fetchData();
+            const updatedUsers = await fetchData();
+            await refreshReminderSchedule(updatedUsers);
             setModalVisible(false);
             appAlert("Success", "Data restored successfully");
           } catch (e) {
@@ -79,7 +125,8 @@ export default function More() {
         try {
           setLoading(true);
           await backupService.wipeAllData();
-          await fetchData();
+          const updatedUsers = await fetchData();
+          await refreshReminderSchedule(updatedUsers);
           setModalVisible(false);
           appAlert("Success", "App data wiped successfully");
         } catch (e) {
@@ -104,6 +151,101 @@ export default function More() {
       >
         <View className="items-center mt-6 mb-2">
           <Image source={require("@/assets/images/icon.png")} className="w-24 h-24 rounded-3xl" />
+        </View>
+
+        <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Reminders</Text>
+
+        <View className="border-t border-b border-border">
+          <TouchableOpacity
+            className="flex-row items-center p-3 active:bg-muted"
+            onPress={() => applyReminderSettings({ enabled: !reminderSettings.enabled })}
+            disabled={reminderBusy}
+          >
+            <Feather
+              name={reminderSettings.enabled ? "bell" : "bell-off"}
+              size={20}
+              color={COLORS.foreground}
+              className="mr-2 ml-1"
+            />
+            <View className="flex-1 ml-2">
+              <Text className="text-foreground text-[15px] font-medium">Debt Reminders</Text>
+              <Text className="text-subtle text-xs mt-0.5">
+                {reminderSettings.enabled ? "Enabled" : "Disabled"}
+              </Text>
+            </View>
+            <Text className="text-muted-foreground text-xs tracking-widest uppercase">
+              {reminderSettings.enabled ? "On" : "Off"}
+            </Text>
+          </TouchableOpacity>
+
+          <View className="h-[1px] bg-border" />
+
+          <View className="p-3">
+            <Text className="text-foreground text-[15px] font-medium">Interval</Text>
+            <Text className="text-subtle text-xs mt-0.5">
+              Random reminder around every {reminderSettings.intervalHours}h
+            </Text>
+
+            <View className="flex-row items-center border border-border mt-3">
+              <TouchableOpacity
+                className="w-12 h-10 items-center justify-center border-r border-border active:bg-muted"
+                onPress={() =>
+                  applyReminderSettings({
+                    intervalHours: Math.max(1, reminderSettings.intervalHours - 1),
+                  })
+                }
+                disabled={reminderBusy}
+              >
+                <Feather name="minus" size={16} color={COLORS.foreground} />
+              </TouchableOpacity>
+
+              <View className="flex-1 items-center justify-center h-10">
+                <Text className="text-foreground text-sm">{reminderSettings.intervalHours} hours</Text>
+              </View>
+
+              <TouchableOpacity
+                className="w-12 h-10 items-center justify-center border-l border-border active:bg-muted"
+                onPress={() =>
+                  applyReminderSettings({
+                    intervalHours: Math.min(168, reminderSettings.intervalHours + 1),
+                  })
+                }
+                disabled={reminderBusy}
+              >
+                <Feather name="plus" size={16} color={COLORS.foreground} />
+              </TouchableOpacity>
+            </View>
+
+            <View className="flex-row flex-wrap mt-3 gap-2">
+              {[3, 6, 12, 24, 48].map((hours) => {
+                const active = reminderSettings.intervalHours === hours;
+
+                return (
+                  <TouchableOpacity
+                    key={hours}
+                    className="px-3 py-2 border"
+                    style={{
+                      borderColor: active ? COLORS.foreground : COLORS.border,
+                      backgroundColor: active ? COLORS.muted : COLORS.background,
+                    }}
+                    onPress={() => applyReminderSettings({ intervalHours: hours })}
+                    disabled={reminderBusy}
+                  >
+                    <Text
+                      className="text-xs"
+                      style={{ color: active ? COLORS.foreground : COLORS.mutedForeground }}
+                    >
+                      {hours}h
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <Text className="text-subtle text-xs mt-3">
+              Reminder picks different people in rotation. Profile photo is attached when supported.
+            </Text>
+          </View>
         </View>
 
         <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Data & Storage</Text>
@@ -184,8 +326,10 @@ export default function More() {
           </TouchableOpacity>
         </View>
 
-        {loading && (
-          <Text className="text-center text-muted-foreground mt-6 text-sm">Processing...</Text>
+        {(loading || reminderBusy) && (
+          <Text className="text-center text-muted-foreground mt-6 text-sm">
+            {loading ? "Processing..." : "Updating reminders..."}
+          </Text>
         )}
       </ScrollView>
 

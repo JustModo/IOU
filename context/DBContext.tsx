@@ -11,11 +11,12 @@ import { IOUTransaction } from "@/types/transaction";
 import { TransactionType } from "@/types/utils";
 import * as userSvc from "@/services/userService";
 import * as txSvc from "@/services/transactionService";
+import { refreshReminderSchedule } from "@/services/notificationService";
 
 type DBContextType = {
   users: User[];
   setUsers: Dispatch<SetStateAction<User[]>>;
-  fetchData: () => Promise<void>;
+  fetchData: () => Promise<User[]>;
   insertUser: (name: string, pfp: string | null, upiId: string | null) => Promise<boolean>;
   updateUser: (
     id: number,
@@ -46,12 +47,15 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
 
 
-  const fetchData = async (): Promise<void> => {
+  const fetchData = async (): Promise<User[]> => {
     try {
       const fetched = await userSvc.getAllUsers();
       setUsers(fetched);
+      void refreshReminderSchedule(fetched);
+      return fetched;
     } catch (error) {
       console.error("Error fetching data:", error);
+      return [];
     }
   };
 
