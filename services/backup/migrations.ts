@@ -25,4 +25,13 @@ export const MIGRATIONS: BackupMigration[] = [
       users: data.users.map((u: any) => ({ ...u, upi_id: u.upi_id ?? null })),
     }),
   },
+  // 1.2.0 -> 1.3.0: bump backup payload version to current app version
+  {
+    fromVersion: "1.2.0",
+    toVersion: "1.3.0",
+    migrate: (data: any) => ({
+      ...data,
+      version: "1.3.0",
+    }),
+  },
 ];
