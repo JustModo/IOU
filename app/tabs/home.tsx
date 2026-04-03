@@ -18,13 +18,8 @@ function formatSignedCurrency(amount: number): string {
   return "₹0";
 }
 
-function initials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
+function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? "";
 }
 
 export default function HomeTab() {
@@ -139,20 +134,6 @@ export default function HomeTab() {
             <Text className="text-muted-foreground text-sm mt-1">{netLabel}</Text>
           </View>
 
-          <View className="w-full mt-6 flex-row">
-            <View className="flex-1 items-center border-r border-border">
-              <Text className="text-subtle text-[11px] uppercase">Users</Text>
-              <Text className="text-foreground text-base mt-1">{stats.totalUsers}</Text>
-            </View>
-            <View className="flex-1 items-center border-r border-border">
-              <Text className="text-subtle text-[11px] uppercase">They Owe</Text>
-              <Text className="text-foreground text-base mt-1">{stats.usersWhoOweMe}</Text>
-            </View>
-            <View className="flex-1 items-center">
-              <Text className="text-subtle text-[11px] uppercase">Settled</Text>
-              <Text className="text-foreground text-base mt-1">{stats.settledUsers}</Text>
-            </View>
-          </View>
         </View>
 
         <View className="pt-4">
@@ -193,7 +174,7 @@ export default function HomeTab() {
                   return (
                     <View key={point.id}>
                       <View className="flex-row items-center justify-between">
-                        <Text className="text-foreground text-xs">{initials(point.name) || "NA"}</Text>
+                        <Text className="text-foreground text-xs">{firstName(point.name) || "NA"}</Text>
                         <Text
                           className="text-xs"
                           style={{ color: point.amount >= 0 ? COLORS.success : COLORS.destructive }}

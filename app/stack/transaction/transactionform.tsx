@@ -177,10 +177,10 @@ export default function AddTransaction() {
                 setOpen={setOpen}
                 setValue={setSelectedType}
                 items={[
-                  { label: "Lent", value: "oweme" },
-                  { label: "Borrowed", value: "oweyou" },
-                  { label: "Got Back", value: "repay" },
-                  { label: "Paid Back", value: "repaid" },
+                  { label: "Lend", value: "oweme" },
+                  { label: "Borrow", value: "oweyou" },
+                  { label: "Collect", value: "repay" },
+                  { label: "Repay", value: "repaid" },
                 ]}
                 containerStyle={{ height: 50 }}
                 style={{

@@ -19,7 +19,6 @@ import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";
 import { getAmountStatus, formatAmount, statusColor } from "@/utils";
 import UpiQrModal from "@/components/UpiQrModal";
-import { appAlert } from "@/services/alertService";
 import { COLORS } from "@/constants";
 
 export default function UserScreen() {
@@ -72,6 +71,16 @@ export default function UserScreen() {
 
   const status = getAmountStatus(data.amount);
   const { display } = formatAmount(data.amount);
+  const hasUpiId = Boolean(data.upi_id?.trim());
+  const actionLabels = repayMode
+    ? {
+        leftTitle: "Collect",
+        rightTitle: "Repay",
+      }
+    : {
+        leftTitle: "Lend",
+        rightTitle: "Borrow",
+      };
 
   return (
     <SafeAreaView className="bg-background flex-1">
@@ -84,18 +93,12 @@ export default function UserScreen() {
           <AntDesign name="left" size={24} color={COLORS.foreground} />
           <Text className="text-foreground font-semibold text-lg">Back</Text>
         </TouchableOpacity>
-        <View className="flex-row items-center gap-8">
-          <TouchableOpacity
-            onPress={() => {
-              if (data.upi_id) {
-                setQrVisible(true);
-              } else {
-                appAlert("No UPI ID", "Set a UPI ID for this user in edit mode");
-              }
-            }}
-          >
-            <MaterialIcons name="qr-code" size={22} color={COLORS.foreground} />
-          </TouchableOpacity>
+        <View className="flex-row items-center gap-4">
+          {hasUpiId && (
+            <TouchableOpacity onPress={() => setQrVisible(true)}>
+              <MaterialIcons name="qr-code" size={22} color={COLORS.foreground} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() =>
               router.push({
@@ -167,10 +170,10 @@ export default function UserScreen() {
       </GestureHandlerRootView>
 
       {/* Bottom Button Section */}
-      <View className="mb-4">
-        <View className="bg-card flex-row justify-between overflow-visible h-14 items-end rounded-2xl mx-1 w-[98%] self-center">
+      <View className="border-t border-border bg-background px-2 pb-2">
+        <View className="flex-row h-16 border-y border-border">
           <TouchableOpacity
-            className="flex-1 h-full justify-center active:opacity-75"
+            className="flex-1 h-full justify-center px-2 active:bg-muted"
             onPress={() =>
               router.push({
                 pathname: `/stack/transaction/transactionform`,
@@ -182,23 +185,22 @@ export default function UserScreen() {
               })
             }
           >
-            <Text className="text-foreground text-center text-lg font-semibold">
-              {repayMode ? "Got Back" : "Lent"}
+            <Text className="text-center text-sm font-semibold" style={{ color: COLORS.success }}>
+              {actionLabels.leftTitle}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="w-20 h-16 bg-accent justify-center items-center rounded-t-xl active:opacity-75"
+            className="w-20 h-16 border-x border-border bg-muted justify-center items-center active:bg-accent"
             onPress={() => setRepayMode((prev) => !prev)}
-            style={{ marginBottom: -1 }}
           >
             <MaterialCommunityIcons
-              name={repayMode ? "cash-minus" : "cash-plus"}
-              size={36}
+              name={repayMode ? "swap-horizontal" : "swap-vertical"}
+              size={20}
               color={COLORS.foreground}
             />
           </TouchableOpacity>
           <TouchableOpacity
-            className="flex-1 h-full justify-center active:opacity-75"
+            className="flex-1 h-full justify-center px-2 active:bg-muted"
             onPress={() =>
               router.push({
                 pathname: `/stack/transaction/transactionform`,
@@ -210,8 +212,8 @@ export default function UserScreen() {
               })
             }
           >
-            <Text className="text-foreground text-center text-lg font-semibold">
-              {repayMode ? "Paid Back" : "Borrowed"}
+            <Text className="text-center text-sm font-semibold" style={{ color: COLORS.destructive }}>
+              {actionLabels.rightTitle}
             </Text>
           </TouchableOpacity>
         </View>
