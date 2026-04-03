@@ -35,14 +35,7 @@
           "backgroundColor": "#000000"
         }
       ],
-      "expo-sqlite",
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/adaptive-icon.png",
-          "color": "#22c55e"
-        }
-      ]
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true

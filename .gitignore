@@ -42,3 +42,5 @@ drizzle/*.sqlite
 drizzle/*.sqlite-journal
 
 builds
+/android
+/ios

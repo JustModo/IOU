@@ -1,8 +1,13 @@
 export type ReminderKind = "collect" | "repay";
 
 export type ReminderTemplate = {
-  title: string;
-  body: string;
+  description: string;
+  caption: string;
+};
+
+export type ReminderMessage = {
+  description: string;
+  caption: string;
 };
 
 export type ReminderCandidate = {

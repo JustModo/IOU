@@ -1,6 +1,13 @@
 import * as FileSystem from "expo-file-system";
 import * as Notifications from "expo-notifications";
-import { Platform } from "react-native";
+import notifee, {
+  AndroidStyle,
+  AuthorizationStatus,
+  TriggerType,
+  type TimestampTrigger,
+} from "@notifee/react-native";
+import { Image, Platform } from "react-native";
+import { ReminderMessage } from "@/types/reminder";
 import { User } from "@/types/user";
 import { ReminderCandidate, ReminderSettings } from "@/types/reminder";
 import { parseUserAmount } from "@/utils";
@@ -9,13 +16,14 @@ import { createReminderMessage } from "@/services/reminderTemplates";
 const REMINDER_SETTINGS_FILE = `${FileSystem.documentDirectory}reminder-settings.json`;
 const REMINDER_IDS_FILE = `${FileSystem.documentDirectory}reminder-scheduled-ids.json`;
 const REMINDER_CHANNEL_ID = "debt-reminders";
+const APP_ICON_URI = Image.resolveAssetSource(require("../assets/images/icon.png"))?.uri;
 
-const MIN_INTERVAL_HOURS = 1;
-const MAX_INTERVAL_HOURS = 168;
+const MIN_INTERVAL_HOURS = 1 / 3600;
+const MAX_INTERVAL_HOURS = 24 * 30;
 
 export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = {
   enabled: false,
-  intervalHours: 12,
+  intervalHours: 72,
   scheduleAheadCount: 18,
 };
 
@@ -127,6 +135,14 @@ function buildCoverageSequence(candidates: ReminderCandidate[], count: number): 
 }
 
 async function ensureNotificationPermissions(): Promise<boolean> {
+  if (Platform.OS === "android") {
+    const current = await notifee.getNotificationSettings();
+    if (current.authorizationStatus >= AuthorizationStatus.AUTHORIZED) return true;
+
+    const asked = await notifee.requestPermission();
+    return asked.authorizationStatus >= AuthorizationStatus.AUTHORIZED;
+  }
+
   const current = await Notifications.getPermissionsAsync();
   if (current.granted) return true;
 
@@ -137,27 +153,133 @@ async function ensureNotificationPermissions(): Promise<boolean> {
 async function ensureAndroidChannel(): Promise<void> {
   if (Platform.OS !== "android") return;
 
-  await Notifications.setNotificationChannelAsync(REMINDER_CHANNEL_ID, {
+  await notifee.createChannel({
+    id: REMINDER_CHANNEL_ID,
     name: "Debt Reminders",
-    importance: Notifications.AndroidImportance.DEFAULT,
-    vibrationPattern: [0, 250, 250, 250],
+    vibration: true,
+    vibrationPattern: [250, 250, 250, 250],
+    lights: true,
     lightColor: "#22c55e",
   });
 }
 
 function buildAttachment(uri?: string | null): Notifications.NotificationContentInput["attachments"] {
   if (Platform.OS !== "ios") return undefined;
-  if (!uri) return undefined;
-  const trimmed = uri.trim();
-  if (!trimmed) return undefined;
+  const normalizedUri = normalizeImageUri(uri);
+  if (!normalizedUri) return undefined;
 
   return [
     {
       identifier: `user-${Date.now()}`,
-      url: trimmed,
+      url: normalizedUri,
       type: "image",
     },
   ];
+}
+
+function normalizeImageUri(uri?: string | null): string | undefined {
+  if (!uri) return undefined;
+  const trimmed = uri.trim();
+  if (!trimmed) return undefined;
+  if (
+    trimmed.startsWith("file://") ||
+    trimmed.startsWith("content://") ||
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("asset:/") ||
+    trimmed.startsWith("data:")
+  ) {
+    return trimmed;
+  }
+  return `file://${trimmed}`;
+}
+
+function resolveNotificationAvatarUri(uri?: string | null): string | undefined {
+  return normalizeImageUri(uri) ?? normalizeImageUri(APP_ICON_URI);
+}
+
+async function scheduleReminderNotification(
+  candidate: ReminderCandidate,
+  message: ReminderMessage,
+  dateMs?: number
+): Promise<string> {
+  if (Platform.OS === "android") {
+    const imageUri = resolveNotificationAvatarUri(candidate.pfp);
+    const id = `reminder-${candidate.id}-${dateMs ?? Date.now()}`;
+    const messageTimestamp = dateMs ?? Date.now();
+
+    const androidNotification: Parameters<typeof notifee.displayNotification>[0] = {
+      id,
+      title: message.caption,
+      body: message.description,
+      data: {
+        userId: String(candidate.id),
+        name: message.caption,
+        amount: String(candidate.amount),
+        kind: candidate.kind,
+        imageUri: imageUri ?? "",
+      },
+      android: {
+        channelId: REMINDER_CHANNEL_ID,
+        smallIcon: "notification_icon",
+        pressAction: { id: "default" },
+        style: {
+          type: AndroidStyle.MESSAGING,
+          person: {
+            id: "self",
+            name: "You",
+          },
+          messages: [
+            {
+              text: message.description,
+              timestamp: messageTimestamp,
+              person: {
+                id: String(candidate.id),
+                name: message.caption,
+                ...(imageUri ? { icon: imageUri } : {}),
+              },
+            },
+          ],
+        },
+      },
+    };
+
+    if (typeof dateMs === "number") {
+      const trigger: TimestampTrigger = {
+        type: TriggerType.TIMESTAMP,
+        timestamp: dateMs,
+      };
+      await notifee.createTriggerNotification(androidNotification, trigger);
+      return id;
+    }
+
+    await notifee.displayNotification(androidNotification);
+    return id;
+  }
+
+  const imageUri = resolveNotificationAvatarUri(candidate.pfp);
+
+  return Notifications.scheduleNotificationAsync({
+    content: {
+      title: message.caption,
+      body: message.description,
+      data: {
+        userId: candidate.id,
+        name: message.caption,
+        amount: candidate.amount,
+        kind: candidate.kind,
+        imageUri: imageUri ?? null,
+      },
+      attachments: buildAttachment(imageUri),
+    },
+    trigger:
+      typeof dateMs === "number"
+        ? {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: new Date(dateMs),
+          }
+        : null,
+  });
 }
 
 async function clearScheduledReminders(): Promise<void> {
@@ -165,6 +287,10 @@ async function clearScheduledReminders(): Promise<void> {
   await Promise.all(
     state.ids.map(async (id) => {
       try {
+        if (Platform.OS === "android") {
+          await notifee.cancelTriggerNotification(id);
+          await notifee.cancelNotification(id);
+        }
         await Notifications.cancelScheduledNotificationAsync(id);
       } catch {
         // Ignore stale ids; they can happen after app reinstalls or manual clears.
@@ -174,11 +300,9 @@ async function clearScheduledReminders(): Promise<void> {
   await writeJsonFile(REMINDER_IDS_FILE, { ids: [] } satisfies ScheduledReminderState);
 }
 
-function nextRandomIntervalMs(intervalHours: number): number {
-  const base = intervalHours * 60 * 60 * 1000;
-  const min = Math.round(base * 0.55);
-  const max = Math.round(base * 1.35);
-  return randomInt(min, max);
+function nextIntervalMs(intervalHours: number): number {
+  const ms = Math.round(intervalHours * 60 * 60 * 1000);
+  return Math.max(1000, ms);
 }
 
 async function scheduleRemindersForCandidates(
@@ -195,27 +319,10 @@ async function scheduleRemindersForCandidates(
   let nextTime = Date.now();
 
   for (const candidate of sequence) {
-    nextTime += nextRandomIntervalMs(settings.intervalHours);
+    nextTime += nextIntervalMs(settings.intervalHours);
     const message = createReminderMessage(candidate);
 
-    const id = await Notifications.scheduleNotificationAsync({
-      content: {
-        title: message.title,
-        body: message.body,
-        data: {
-          userId: candidate.id,
-          name: candidate.name,
-          amount: candidate.amount,
-          kind: candidate.kind,
-          imageUri: candidate.pfp ?? null,
-        },
-        attachments: buildAttachment(candidate.pfp),
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date: new Date(nextTime),
-      },
-    });
+    const id = await scheduleReminderNotification(candidate, message, nextTime);
 
     ids.push(id);
   }
@@ -265,4 +372,25 @@ export async function updateReminderSettings(
 
 export async function bootstrapReminderEngine(users: User[]): Promise<void> {
   await refreshReminderSchedule(users);
+}
+
+export type TriggerDebtReminderNowResult = "sent" | "permission-denied" | "no-candidates";
+
+export async function triggerDebtReminderNow(
+  users: User[]
+): Promise<TriggerDebtReminderNowResult> {
+  await ensureAndroidChannel();
+
+  const permissionGranted = await ensureNotificationPermissions();
+  if (!permissionGranted) return "permission-denied";
+
+  const candidates = buildCandidates(users);
+  if (!candidates.length) return "no-candidates";
+
+  const candidate = candidates[randomInt(0, candidates.length - 1)];
+  const message = createReminderMessage(candidate);
+
+  await scheduleReminderNotification(candidate, message);
+
+  return "sent";
 }

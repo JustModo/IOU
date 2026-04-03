@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, Linking } from "react-native";
+import { Modal, View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, Linking } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
@@ -16,16 +16,65 @@ import { APP_VERSION, DEVELOPER_NAME, GITHUB_RELEASES_URL, GITHUB_REPO_NAME } fr
 import { appAlert } from "@/services/alertService";
 import { checkForUpdates } from "@/services/updateService";
 import { COLORS } from "@/constants";
+import { runDevNotificationTriggerFlow } from "@/services/devScripts";
+
+type IntervalUnit = "days" | "hours";
+
+type IntervalParts = {
+  days: number;
+  hours: number;
+};
+
+const MAX_INTERVAL_HOURS = 24 * 30;
+
+function clampIntervalHours(totalHours: number): number {
+  return Math.min(MAX_INTERVAL_HOURS, Math.max(1, Math.round(totalHours)));
+}
+
+function intervalPartsFromHours(intervalHours: number): IntervalParts {
+  const totalHours = clampIntervalHours(intervalHours);
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
+
+  return { days, hours };
+}
+
+function intervalHoursFromParts(parts: IntervalParts): number {
+  const totalHours = Math.max(0, Math.round(parts.days)) * 24 + Math.max(0, Math.round(parts.hours));
+  return clampIntervalHours(totalHours);
+}
+
+function formatIntervalHoursHuman(intervalHours: number): string {
+  const parts = intervalPartsFromHours(intervalHours);
+  const labels: string[] = [];
+
+  if (parts.days > 0) {
+    labels.push(`${parts.days} day${parts.days === 1 ? "" : "s"}`);
+  }
+
+  if (parts.hours > 0) {
+    labels.push(`${parts.hours} hour${parts.hours === 1 ? "" : "s"}`);
+  }
+
+  if (!labels.length) return "1 hour";
+
+  return labels.join(" ");
+}
 
 export default function More() {
   const { users, fetchData } = useDB();
   const [loading, setLoading] = useState(false);
   const [reminderBusy, setReminderBusy] = useState(false);
+  const [devScriptBusy, setDevScriptBusy] = useState(false);
   const [reminderSettings, setReminderSettings] =
     useState<ReminderSettings>(DEFAULT_REMINDER_SETTINGS);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
+  const [intervalModalVisible, setIntervalModalVisible] = useState(false);
+  const [intervalDraft, setIntervalDraft] = useState<IntervalParts>(
+    intervalPartsFromHours(DEFAULT_REMINDER_SETTINGS.intervalHours)
+  );
   const [modalConfig, setModalConfig] = useState({
     title: "",
     message: "",
@@ -72,6 +121,27 @@ export default function More() {
     } finally {
       setReminderBusy(false);
     }
+  };
+
+  const handleOpenIntervalModal = () => {
+    setIntervalDraft(intervalPartsFromHours(reminderSettings.intervalHours));
+    setIntervalModalVisible(true);
+  };
+
+  const handleIntervalChange = (unit: IntervalUnit, delta: number) => {
+    setIntervalDraft((current) => {
+      const updated = {
+        ...current,
+        [unit]: Math.max(0, current[unit] + delta),
+      };
+
+      return intervalPartsFromHours(intervalHoursFromParts(updated));
+    });
+  };
+
+  const handleSaveInterval = async () => {
+    await applyReminderSettings({ intervalHours: intervalHoursFromParts(intervalDraft) });
+    setIntervalModalVisible(false);
   };
 
   const handleExport = async () => {
@@ -140,6 +210,19 @@ export default function More() {
     );
   };
 
+  const handleRunDevNotificationFlow = async () => {
+    try {
+      setDevScriptBusy(true);
+      const alert = await runDevNotificationTriggerFlow(users);
+      appAlert(alert.title, alert.message);
+    } catch (error) {
+      console.error(error);
+      appAlert("Error", "Failed to run dev notification script");
+    } finally {
+      setDevScriptBusy(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background">
       <TitleBar title="Settings" />
@@ -170,82 +253,39 @@ export default function More() {
             <View className="flex-1 ml-2">
               <Text className="text-foreground text-[15px] font-medium">Debt Reminders</Text>
               <Text className="text-subtle text-xs mt-0.5">
-                {reminderSettings.enabled ? "Enabled" : "Disabled"}
+                {reminderSettings.enabled
+                  ? `Enabled`
+                  : "Disabled"}
               </Text>
             </View>
-            <Text className="text-muted-foreground text-xs tracking-widest uppercase">
+            <Text
+              className="text-xs tracking-widest uppercase"
+              style={{ color: reminderSettings.enabled ? COLORS.foreground : COLORS.mutedForeground }}
+            >
               {reminderSettings.enabled ? "On" : "Off"}
             </Text>
           </TouchableOpacity>
 
-          <View className="h-[1px] bg-border" />
-
-          <View className="p-3">
-            <Text className="text-foreground text-[15px] font-medium">Interval</Text>
-            <Text className="text-subtle text-xs mt-0.5">
-              Random reminder around every {reminderSettings.intervalHours}h
-            </Text>
-
-            <View className="flex-row items-center border border-border mt-3">
-              <TouchableOpacity
-                className="w-12 h-10 items-center justify-center border-r border-border active:bg-muted"
-                onPress={() =>
-                  applyReminderSettings({
-                    intervalHours: Math.max(1, reminderSettings.intervalHours - 1),
-                  })
-                }
-                disabled={reminderBusy}
-              >
-                <Feather name="minus" size={16} color={COLORS.foreground} />
-              </TouchableOpacity>
-
-              <View className="flex-1 items-center justify-center h-10">
-                <Text className="text-foreground text-sm">{reminderSettings.intervalHours} hours</Text>
-              </View>
+          {reminderSettings.enabled && (
+            <>
+              <View className="h-[1px] bg-border ml-11" />
 
               <TouchableOpacity
-                className="w-12 h-10 items-center justify-center border-l border-border active:bg-muted"
-                onPress={() =>
-                  applyReminderSettings({
-                    intervalHours: Math.min(168, reminderSettings.intervalHours + 1),
-                  })
-                }
+                className="flex-row items-center p-3 active:bg-muted"
+                onPress={handleOpenIntervalModal}
                 disabled={reminderBusy}
               >
-                <Feather name="plus" size={16} color={COLORS.foreground} />
+                <Feather name="clock" size={20} color={COLORS.foreground} className="mr-2 ml-1" />
+                <View className="flex-1 ml-2">
+                  <Text className="text-foreground text-[15px] font-medium">Reminder Interval</Text>
+                  <Text className="text-subtle text-xs mt-0.5">
+                    Every {formatIntervalHoursHuman(reminderSettings.intervalHours)}
+                  </Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
               </TouchableOpacity>
-            </View>
-
-            <View className="flex-row flex-wrap mt-3 gap-2">
-              {[3, 6, 12, 24, 48].map((hours) => {
-                const active = reminderSettings.intervalHours === hours;
-
-                return (
-                  <TouchableOpacity
-                    key={hours}
-                    className="px-3 py-2 border"
-                    style={{
-                      borderColor: active ? COLORS.foreground : COLORS.border,
-                      backgroundColor: active ? COLORS.muted : COLORS.background,
-                    }}
-                    onPress={() => applyReminderSettings({ intervalHours: hours })}
-                    disabled={reminderBusy}
-                  >
-                    <Text
-                      className="text-xs"
-                      style={{ color: active ? COLORS.foreground : COLORS.mutedForeground }}
-                    >
-                      {hours}h
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <Text className="text-subtle text-xs mt-3">
-              Reminder picks different people in rotation. Profile photo is attached when supported.
-            </Text>
-          </View>
+            </>
+          )}
         </View>
 
         <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Data & Storage</Text>
@@ -296,6 +336,28 @@ export default function More() {
           </TouchableOpacity>
         </View>
 
+        {__DEV__ && (
+          <>
+            <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Dev Tools</Text>
+
+            <View className="border-t border-b border-border">
+              {/* Dev script row: comment out this TouchableOpacity block to disable from More screen. */}
+              <TouchableOpacity
+                className="flex-row items-center p-3 active:bg-muted"
+                onPress={handleRunDevNotificationFlow}
+                disabled={devScriptBusy}
+              >
+                <Feather name="tool" size={20} color={COLORS.foreground} className="mr-2 ml-1" />
+                <View className="flex-1 ml-2">
+                  <Text className="text-foreground text-[15px] font-medium">Run Notification Dev Flow</Text>
+                  <Text className="text-subtle text-xs mt-0.5">Manually executes notification trigger flow</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
         <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">About</Text>
         
         <View className="border-t border-border bg-background">
@@ -326,9 +388,9 @@ export default function More() {
           </TouchableOpacity>
         </View>
 
-        {(loading || reminderBusy) && (
+        {(loading || reminderBusy || devScriptBusy) && (
           <Text className="text-center text-muted-foreground mt-6 text-sm">
-            {loading ? "Processing..." : "Updating reminders..."}
+            {loading ? "Processing..." : reminderBusy ? "Updating reminders..." : "Running dev script..."}
           </Text>
         )}
       </ScrollView>
@@ -342,6 +404,81 @@ export default function More() {
         confirmText={modalConfig.confirmText}
         variant={modalConfig.variant}
       />
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={intervalModalVisible}
+        onRequestClose={() => setIntervalModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center px-4" style={{ backgroundColor: COLORS.overlay }}>
+          <View className="bg-background p-6 w-full max-w-sm border border-input">
+            <Text className="text-foreground text-[17px] font-bold text-center tracking-widest uppercase">
+              Reminder Interval
+            </Text>
+            <Text className="text-muted-foreground text-center text-[14px] leading-5 mt-2">
+              Pick days and hours, then save.
+            </Text>
+
+            <View className="flex-row mt-5 gap-3">
+              {[
+                { key: "days" as const, label: "Days", value: intervalDraft.days },
+                { key: "hours" as const, label: "Hours", value: intervalDraft.hours },
+              ].map((item) => (
+                <View key={item.key} className="flex-1 border border-input">
+                  <Text className="text-subtle text-xs text-center py-2 tracking-widest uppercase">
+                    {item.label}
+                  </Text>
+                  <View className="h-[1px] bg-border" />
+                  <View className="flex-row items-center h-12">
+                    <TouchableOpacity
+                      className="w-12 h-12 items-center justify-center border-r border-input active:bg-muted"
+                      onPress={() => handleIntervalChange(item.key, -1)}
+                      disabled={reminderBusy}
+                    >
+                      <Feather name="minus" size={16} color={COLORS.foreground} />
+                    </TouchableOpacity>
+
+                    <View className="flex-1 items-center justify-center">
+                      <Text className="text-foreground text-base font-semibold">{item.value}</Text>
+                    </View>
+
+                    <TouchableOpacity
+                      className="w-12 h-12 items-center justify-center border-l border-input active:bg-muted"
+                      onPress={() => handleIntervalChange(item.key, 1)}
+                      disabled={reminderBusy}
+                    >
+                      <Feather name="plus" size={16} color={COLORS.foreground} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            <Text className="text-subtle text-center text-xs mt-4">
+              Current: {formatIntervalHoursHuman(intervalHoursFromParts(intervalDraft))}
+            </Text>
+
+            <View className="flex-row gap-3 mt-6">
+              <TouchableOpacity
+                className="flex-1 py-3 border border-input items-center"
+                onPress={() => setIntervalModalVisible(false)}
+                disabled={reminderBusy}
+              >
+                <Text className="text-foreground font-medium text-[15px]">Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 py-3 items-center bg-foreground"
+                onPress={handleSaveInterval}
+                disabled={reminderBusy}
+              >
+                <Text className="font-medium text-[15px] text-background">Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
