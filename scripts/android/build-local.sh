@@ -6,6 +6,9 @@ WORK_ROOT="${WORK_ROOT:-/workspace}"
 OUTPUT_DIR="${OUTPUT_DIR:-/out}"
 PROJECT_DIR="$WORK_ROOT/project"
 
+# Expo CLI requires NODE_ENV to be explicitly set in non-interactive build contexts.
+export NODE_ENV="${NODE_ENV:-production}"
+
 mkdir -p "$PROJECT_DIR" "$OUTPUT_DIR"
 
 echo "== Preparing isolated workspace =="
@@ -13,7 +16,10 @@ find "$PROJECT_DIR" -mindepth 1 -maxdepth 1 ! -name node_modules ! -name .gradle
 
 tar -C "$SRC_DIR" \
   --exclude=node_modules \
-  --exclude=android \
+  --exclude=android/.gradle \
+  --exclude=android/build \
+  --exclude=android/app/build \
+  --exclude=android/local.properties \
   --exclude=ios \
   --exclude=builds \
   --exclude=.git \
@@ -22,12 +28,13 @@ tar -C "$SRC_DIR" \
 
 cd "$PROJECT_DIR"
 
-echo "== Installing dependencies (cached) =="
-if [ ! -f "node_modules/expo/package.json" ]; then
-  npm ci
-fi
+echo "== Installing dependencies (deterministic) =="
+# Keep devDependencies for Metro/Babel tooling used in release bundling.
+npm ci --no-audit --prefer-offline --include=dev
 
 echo "== Resolving app config =="
+
+echo "NODE_ENV=$NODE_ENV"
 
 APP_CONFIG=$(npx expo config --json)
 
@@ -39,10 +46,16 @@ OUTPUT_BASE="${APP_NAME}_v${APP_VERSION}"
 echo "App: $APP_NAME"
 echo "Version: $APP_VERSION"
 
-echo "== Prebuild (only if needed) =="
-CI=1 npx expo prebuild --platform android
+if [ -d "android" ]; then
+  echo "== Using committed Android project (bare workflow) =="
+else
+  echo "== Android folder missing, running prebuild fallback =="
+  CI=1 npx expo prebuild --platform android
+fi
 
 cd android
+
+chmod +x gradlew
 
 echo "== Inject signing config =="
 
