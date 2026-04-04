@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system";
+import { File, Directory, Paths } from "expo-file-system";
 import {
   BackupData,
   BackupImageAsset,
@@ -41,13 +41,11 @@ async function buildProfilePictures(
     if (!user.pfp) continue;
 
     try {
-      const info = await FileSystem.getInfoAsync(user.pfp);
-      if (!info.exists) continue;
+      const file = new File(user.pfp);
+      if (!file.exists) continue;
 
       const ext = extFromFileName(user.pfp);
-      const dataBase64 = await FileSystem.readAsStringAsync(user.pfp, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      const dataBase64 = await file.base64();
 
       profilePictures[String(user.id)] = {
         fileName: `user_${user.id}.${ext}`,
@@ -70,8 +68,8 @@ async function restoreProfilePictures(
     return users;
   }
 
-  const imagesDir = `${FileSystem.documentDirectory}images/`;
-  await FileSystem.makeDirectoryAsync(imagesDir, { intermediates: true });
+  const imagesDir = new Directory(Paths.document, "images");
+  imagesDir.create({ intermediates: true, idempotent: true });
 
   const restoredUsers = await Promise.all(
     users.map(async (user) => {
@@ -80,12 +78,12 @@ async function restoreProfilePictures(
 
       try {
         const ext = extFromFileName(imageAsset.fileName);
-        const targetPath = `${imagesDir}restored_${user.id}_${Date.now()}.${ext}`;
-        await FileSystem.writeAsStringAsync(targetPath, imageAsset.dataBase64, {
-          encoding: FileSystem.EncodingType.Base64,
+        const targetFile = new File(imagesDir, `restored_${user.id}_${Date.now()}.${ext}`);
+        targetFile.write(imageAsset.dataBase64, {
+          encoding: "base64",
         });
 
-        return { ...user, pfp: targetPath };
+        return { ...user, pfp: targetFile.uri };
       } catch {
         return user;
       }

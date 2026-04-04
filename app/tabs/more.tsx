@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Modal, View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, Linking } from "react-native";
+import { Modal, View, Text, Pressable, ScrollView, Image, Linking } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useDB } from "@/context/DBContext";
@@ -295,7 +296,7 @@ export default function More() {
         <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Reminders</Text>
 
         <View className="border-t border-b border-border">
-          <TouchableOpacity
+          <Pressable
             className="flex-row items-center p-3 active:bg-muted"
             onPress={handleToggleDebtReminders}
             disabled={reminderBusy}
@@ -320,13 +321,13 @@ export default function More() {
             >
               {reminderSettings.enabled ? "On" : "Off"}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
 
           {reminderSettings.enabled && (
             <>
               <View className="h-[1px] bg-border ml-11" />
 
-              <TouchableOpacity
+              <Pressable
                 className="flex-row items-center p-3 active:bg-muted"
                 onPress={handleOpenIntervalModal}
                 disabled={reminderBusy}
@@ -339,11 +340,11 @@ export default function More() {
                   </Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
-              </TouchableOpacity>
+              </Pressable>
 
               <View className="h-[1px] bg-border ml-11" />
 
-              <TouchableOpacity
+              <Pressable
                 className="flex-row items-center p-3 active:bg-muted"
                 onPress={handleOpenAndroidReminderSetup}
                 disabled={reminderBusy}
@@ -356,7 +357,7 @@ export default function More() {
                   </Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
-              </TouchableOpacity>
+              </Pressable>
             </>
           )}
         </View>
@@ -364,7 +365,7 @@ export default function More() {
         <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Data & Storage</Text>
         
         <View className="border-t border-b border-border">
-          <TouchableOpacity
+          <Pressable
             className="flex-row items-center p-3 active:bg-muted"
             onPress={handleExport}
             disabled={loading}
@@ -375,11 +376,11 @@ export default function More() {
               <Text className="text-subtle text-xs mt-0.5">Export to JSON file</Text>
             </View>
             <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
-          </TouchableOpacity>
+          </Pressable>
 
           <View className="h-[1px] bg-border ml-11" />
 
-          <TouchableOpacity
+          <Pressable
             className="flex-row items-center p-3 active:bg-muted"
             onPress={handleImport}
             disabled={loading}
@@ -390,13 +391,13 @@ export default function More() {
               <Text className="text-subtle text-xs mt-0.5">Import from backup</Text>
             </View>
             <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Danger Zone</Text>
         
         <View className="border-t border-b border-border">
-          <TouchableOpacity
+          <Pressable
             className="flex-row items-center p-3 active:bg-muted"
             onPress={handleWipe}
             disabled={loading}
@@ -406,7 +407,7 @@ export default function More() {
               <Text className="text-destructive text-[15px] font-medium">Wipe All Data</Text>
               <Text className="text-subtle text-xs mt-0.5">Permanently delete everything</Text>
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {__DEV__ && (
@@ -414,8 +415,8 @@ export default function More() {
             <Text className="text-subtle text-[10px] font-bold tracking-widest mb-1 mt-6 px-4 uppercase">Dev Tools</Text>
 
             <View className="border-t border-b border-border">
-              {/* Dev script row: comment out this TouchableOpacity block to disable from More screen. */}
-              <TouchableOpacity
+              {/* Dev script row: comment out this Pressable block to disable from More screen. */}
+              <Pressable
                 className="flex-row items-center p-3 active:bg-muted"
                 onPress={handleRunDevNotificationFlow}
                 disabled={devScriptBusy}
@@ -426,7 +427,7 @@ export default function More() {
                   <Text className="text-subtle text-xs mt-0.5">Manually executes notification trigger flow</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </>
         )}
@@ -438,7 +439,7 @@ export default function More() {
             <Text className="text-foreground text-[15px] ml-1">Developer</Text>
             <Text className="text-muted-foreground text-[15px]">{DEVELOPER_NAME}</Text>
           </View>
-          <TouchableOpacity 
+          <Pressable 
             className="flex-row justify-between items-center p-3 active:bg-muted"
             onPress={() => Linking.openURL(GITHUB_URL)}
           >
@@ -447,18 +448,18 @@ export default function More() {
               <Text className="text-link text-[15px] mr-1">{GITHUB_REPO_NAME}</Text>
               <Feather name="external-link" size={14} color={COLORS.link} />
             </View>
-          </TouchableOpacity>
+          </Pressable>
           <View className="flex-row justify-between items-center p-3">
             <Text className="text-foreground text-[15px] ml-1">Version</Text>
             <Text className="text-muted-foreground text-[15px]">{APP_VERSION}</Text>
           </View>
-          <TouchableOpacity 
+          <Pressable 
             className="flex-row justify-between items-center p-3 active:bg-muted"
             onPress={() => checkForUpdates(false)}
           >
             <Text className="text-foreground text-[15px] ml-1">Check For Updates</Text>
             <MaterialIcons name="autorenew" size={20} color={COLORS.subtle} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         {(loading || reminderBusy || devScriptBusy) && (
@@ -508,25 +509,25 @@ export default function More() {
                   </Text>
                   <View className="h-[1px] bg-border" />
                   <View className="flex-row items-center h-12">
-                    <TouchableOpacity
+                    <Pressable
                       className="w-12 h-12 items-center justify-center border-r border-input active:bg-muted"
                       onPress={() => handleIntervalChange(item.key, -1)}
                       disabled={reminderBusy}
                     >
                       <Feather name="minus" size={16} color={COLORS.foreground} />
-                    </TouchableOpacity>
+                    </Pressable>
 
                     <View className="flex-1 items-center justify-center">
                       <Text className="text-foreground text-base font-semibold">{item.value}</Text>
                     </View>
 
-                    <TouchableOpacity
+                    <Pressable
                       className="w-12 h-12 items-center justify-center border-l border-input active:bg-muted"
                       onPress={() => handleIntervalChange(item.key, 1)}
                       disabled={reminderBusy}
                     >
                       <Feather name="plus" size={16} color={COLORS.foreground} />
-                    </TouchableOpacity>
+                    </Pressable>
                   </View>
                 </View>
               ))}
@@ -537,21 +538,21 @@ export default function More() {
             </Text>
 
             <View className="flex-row gap-3 mt-6">
-              <TouchableOpacity
-                className="flex-1 py-3 border border-input items-center"
+              <Pressable
+                className="flex-1 py-3 border border-input items-center active:bg-muted"
                 onPress={() => setIntervalModalVisible(false)}
                 disabled={reminderBusy}
               >
                 <Text className="text-foreground font-medium text-[15px]">Cancel</Text>
-              </TouchableOpacity>
+              </Pressable>
 
-              <TouchableOpacity
-                className="flex-1 py-3 items-center bg-foreground"
+              <Pressable
+                className="flex-1 py-3 items-center bg-foreground active:bg-muted"
                 onPress={handleSaveInterval}
                 disabled={reminderBusy}
               >
                 <Text className="font-medium text-[15px] text-background">Save</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         </View>

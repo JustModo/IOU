@@ -1,4 +1,4 @@
-import * as FileSystem from "expo-file-system";
+import { File, Paths } from "expo-file-system";
 import * as Notifications from "expo-notifications";
 import notifee, {
   AndroidStyle,
@@ -14,8 +14,8 @@ import { ReminderCandidate, ReminderSettings } from "@/types/reminder";
 import { parseUserAmount } from "@/utils";
 import { createReminderMessage } from "@/services/reminderTemplates";
 
-const REMINDER_SETTINGS_FILE = `${FileSystem.documentDirectory}reminder-settings.json`;
-const REMINDER_IDS_FILE = `${FileSystem.documentDirectory}reminder-scheduled-ids.json`;
+const REMINDER_SETTINGS_FILE = new File(Paths.document, "reminder-settings.json").uri;
+const REMINDER_IDS_FILE = new File(Paths.document, "reminder-scheduled-ids.json").uri;
 const REMINDER_CHANNEL_ID = "debt-reminders";
 const APP_ICON_URI = Image.resolveAssetSource(require("../assets/images/icon.png"))?.uri;
 
@@ -42,6 +42,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -60,9 +62,9 @@ function shuffle<T>(items: T[]): T[] {
 
 async function readJsonFile<T>(fileUri: string, fallback: T): Promise<T> {
   try {
-    const info = await FileSystem.getInfoAsync(fileUri);
-    if (!info.exists) return fallback;
-    const content = await FileSystem.readAsStringAsync(fileUri);
+    const file = new File(fileUri);
+    if (!file.exists) return fallback;
+    const content = await file.text();
     return (JSON.parse(content) as T) ?? fallback;
   } catch {
     return fallback;
@@ -70,7 +72,8 @@ async function readJsonFile<T>(fileUri: string, fallback: T): Promise<T> {
 }
 
 async function writeJsonFile(fileUri: string, value: unknown): Promise<void> {
-  await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(value));
+  const file = new File(fileUri);
+  file.write(JSON.stringify(value));
 }
 
 function normalizeSettings(raw?: Partial<ReminderSettings>): ReminderSettings {

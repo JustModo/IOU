@@ -1,7 +1,7 @@
 import { User } from "@/types/user";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, Pressable, View } from "react-native";
 import { getAmountStatus, formatAmount, statusColor } from "@/utils";
 
 export default function UserTab({ user }: { user: User }) {
@@ -11,7 +11,7 @@ export default function UserTab({ user }: { user: User }) {
   const { display } = formatAmount(user.amount);
 
   return (
-    <TouchableOpacity
+    <Pressable
       onPress={() => router.push(`/stack/user/${user.id}`)}
       className="w-full flex-row items-center border-b border-border bg-background active:bg-muted"
     >
@@ -42,6 +42,6 @@ export default function UserTab({ user }: { user: User }) {
           {display}
         </Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }

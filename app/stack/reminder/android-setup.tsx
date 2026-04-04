@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View, Linking, Platform, ScrollView } from "react-native";
+import { Text, Pressable, View, Linking, Platform, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -88,10 +88,10 @@ export default function AndroidReminderSetupScreen() {
     return (
       <SafeAreaView className="bg-background flex-1">
         <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4">
-          <TouchableOpacity onPress={() => router.back()} className="flex-row items-center gap-2">
+          <Pressable onPress={() => router.back()} className="flex-row items-center gap-2 active:bg-muted">
             <AntDesign name="left" size={24} color={COLORS.foreground} />
             <Text className="text-foreground font-semibold text-[15px]">Back</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
         <View className="flex-1 justify-center items-center px-6">
@@ -107,16 +107,16 @@ export default function AndroidReminderSetupScreen() {
   return (
     <SafeAreaView className="bg-background flex-1">
       <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4 justify-between">
-        <TouchableOpacity onPress={() => router.back()} className="flex-row items-center gap-2">
+        <Pressable onPress={() => router.back()} className="flex-row items-center gap-2 active:bg-muted">
           <AntDesign name="left" size={24} color={COLORS.foreground} />
           <Text className="text-foreground font-semibold text-[15px]">Back</Text>
-        </TouchableOpacity>
+        </Pressable>
 
-        <TouchableOpacity onPress={loadState} disabled={busy} className="px-3 py-2 border border-input">
+        <Pressable onPress={loadState} disabled={busy} className="px-3 py-2 border border-input active:bg-muted">
           <Text className="text-foreground text-xs font-medium tracking-widest uppercase">
             {busy ? "Checking" : "Refresh"}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 16, paddingBottom: 32 }}>
@@ -134,9 +134,9 @@ export default function AndroidReminderSetupScreen() {
             <Text className="text-muted-foreground text-xs mt-2 leading-5">
               Must be allowed so reminders can appear.
             </Text>
-            <TouchableOpacity className="mt-3 py-3 border border-input items-center" onPress={openNotificationSettings}>
+            <Pressable className="mt-3 py-3 border border-input items-center active:bg-muted" onPress={openNotificationSettings}>
               <Text className="text-foreground font-medium text-[14px]">Open Notification Settings</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           <View className="border border-input p-4">
@@ -147,9 +147,9 @@ export default function AndroidReminderSetupScreen() {
             <Text className="text-muted-foreground text-xs mt-2 leading-5">
               Improves reliability for scheduled reminders.
             </Text>
-            <TouchableOpacity className="mt-3 py-3 border border-input items-center" onPress={openExactAlarmSettings}>
+            <Pressable className="mt-3 py-3 border border-input items-center active:bg-muted" onPress={openExactAlarmSettings}>
               <Text className="text-foreground font-medium text-[14px]">Open Exact Alarm Settings</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           <View className="border border-input p-4">
@@ -164,9 +164,9 @@ export default function AndroidReminderSetupScreen() {
             <Text className="text-muted-foreground text-xs mt-2 leading-5">
               Disable optimization for this app to reduce delayed notifications.
             </Text>
-            <TouchableOpacity className="mt-3 py-3 border border-input items-center" onPress={openBatteryOptimizationSettings}>
+            <Pressable className="mt-3 py-3 border border-input items-center active:bg-muted" onPress={openBatteryOptimizationSettings}>
               <Text className="text-foreground font-medium text-[14px]">Open Battery Optimization</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
 
           {state?.hasDevicePowerManagerSettings && (
@@ -175,9 +175,9 @@ export default function AndroidReminderSetupScreen() {
               <Text className="text-muted-foreground text-xs mt-2 leading-5">
                 Some manufacturers add extra background limits here.
               </Text>
-              <TouchableOpacity className="mt-3 py-3 border border-input items-center" onPress={openDevicePowerManagerSettings}>
+              <Pressable className="mt-3 py-3 border border-input items-center active:bg-muted" onPress={openDevicePowerManagerSettings}>
                 <Text className="text-foreground font-medium text-[14px]">Open Device Power Manager</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           )}
         </View>

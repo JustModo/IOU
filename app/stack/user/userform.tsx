@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, KeyboardAvoidingView, Modal, Platform, ScrollView, Text, TextInput, Pressable, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
@@ -115,17 +115,17 @@ export default function AddUser() {
     <SafeAreaView className="bg-background flex-1">
       {/* Header */}
         <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4 justify-between">
-          <TouchableOpacity
+          <Pressable
           onPress={() => router.back()}
-          className="flex-row items-center gap-2"
+          className="flex-row items-center gap-2 active:bg-muted"
         >
           <AntDesign name="left" size={24} color={COLORS.foreground} />
           <Text className="text-foreground font-semibold text-lg">Back</Text>
-        </TouchableOpacity>
+        </Pressable>
         {mode === "update" && (
-             <TouchableOpacity onPress={handleDelete}>
+             <Pressable onPress={handleDelete} className="active:bg-muted">
                 <Feather name="trash-2" size={24} color={COLORS.destructive} />
-             </TouchableOpacity>
+             </Pressable>
         )}
       </View>
 
@@ -141,10 +141,10 @@ export default function AddUser() {
           <View className="items-center gap-4 w-full py-16">
             <View className="bg-muted border border-border h-40 w-40 rounded-full overflow-hidden justify-center items-center">
               {selectedImage ? (
-                <TouchableOpacity
+                <Pressable
                   onPress={handlePickImage}
                   onLongPress={() => setSelectedImage(null)}
-                  className="w-full h-full justify-center items-center"
+                  className="w-full h-full justify-center items-center active:bg-muted"
                 >
                   <Image
                     key={selectedImage}
@@ -153,15 +153,15 @@ export default function AddUser() {
                     onError={(e) => {}
                     }
                   />
-                </TouchableOpacity>
+                </Pressable>
               ) : (
-                <TouchableOpacity
+                <Pressable
                   onPress={handlePickImage}
                   onLongPress={() => setSelectedImage(null)}
-                  className="w-full h-full justify-center items-center"
+                  className="w-full h-full justify-center items-center active:bg-muted"
                 >
                   <Feather name="camera" size={32} color={COLORS.mutedForeground} />
-                </TouchableOpacity>
+                </Pressable>
               )}
             </View>
 
@@ -187,15 +187,15 @@ export default function AddUser() {
                 autoCapitalize="none"
                 keyboardType="email-address"
               />
-              <TouchableOpacity onPress={handleOpenScanner}>
+              <Pressable onPress={handleOpenScanner} className="active:bg-muted">
                 <MaterialCommunityIcons name="qrcode-scan" size={24} color={COLORS.mutedForeground} />
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
 
           {/* Save Button */}
-          <TouchableOpacity
-            className="w-full p-4 bg-card rounded-lg"
+          <Pressable
+            className="w-full p-4 bg-card rounded-lg active:bg-muted"
             onPress={mode === "insert" ? handleInsert : handleUpdate}
             disabled={!name.trim()}
           >
@@ -205,20 +205,20 @@ export default function AddUser() {
             >
               {mode === "insert" ? "Save" : "Update"}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
 
       <Modal visible={scannerVisible} animationType="slide">
         <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
           <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4">
-            <TouchableOpacity
+            <Pressable
               onPress={() => setScannerVisible(false)}
-              className="flex-row items-center gap-2"
+              className="flex-row items-center gap-2 active:bg-muted"
             >
               <AntDesign name="left" size={24} color={COLORS.foreground} />
               <Text className="text-foreground font-semibold text-lg">Cancel</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
           <CameraView
             style={{ flex: 1 }}

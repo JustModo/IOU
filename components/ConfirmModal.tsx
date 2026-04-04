@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Text, TouchableOpacity, View } from "react-native";
+import { Modal, Text, Pressable, View } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { COLORS } from "@/constants";
 
@@ -51,22 +51,21 @@ export default function ConfirmModal({
 
           <View className="flex-row gap-3">
             {!isAlert && (
-              <TouchableOpacity
-                className="flex-1 py-3 border border-input items-center"
+              <Pressable
+                className="flex-1 py-3 border border-input items-center active:bg-muted"
                 onPress={onCancel}
               >
                 <Text className="text-foreground font-medium text-[15px]">{cancelText}</Text>
-              </TouchableOpacity>
+              </Pressable>
             )}
-
-            <TouchableOpacity
+            <Pressable
               className={`flex-1 py-3 items-center ${
                 variant === "danger" ? "bg-destructive" : "bg-foreground"
-              }`}
+              } active:bg-muted`}
               onPress={onConfirm}
             >
               <Text className={`font-medium text-[15px] ${variant === "danger" ? "text-destructive-foreground" : "text-background"}`}>{isAlert && confirmText === "Confirm" ? "OK" : confirmText}</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>

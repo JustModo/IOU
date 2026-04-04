@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
+import { File, Directory, Paths } from "expo-file-system";
 
 export async function pickAndSaveImage(): Promise<string | null> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -9,7 +9,7 @@ export async function pickAndSaveImage(): Promise<string | null> {
   }
 
   const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: "images",
+    mediaTypes: ["images"],
     allowsEditing: true,
     aspect: [1, 1],
     quality: 1,
@@ -20,11 +20,12 @@ export async function pickAndSaveImage(): Promise<string | null> {
   }
 
   const sourceUri = result.assets[0].uri;
-  const imagesDir = `${FileSystem.documentDirectory}images/`;
-  await FileSystem.makeDirectoryAsync(imagesDir, { intermediates: true });
+  const imagesDir = new Directory(Paths.document, "images");
+  imagesDir.create({ intermediates: true, idempotent: true });
 
-  const newPath = `${imagesDir}${Date.now()}.jpg`;
-  await FileSystem.moveAsync({ from: sourceUri, to: newPath });
+  const newFile = new File(imagesDir, `${Date.now()}.jpg`);
+  const sourceFile = new File(sourceUri);
+  sourceFile.move(newFile);
 
-  return newPath;
+  return newFile.uri;
 }

@@ -7,7 +7,7 @@ import {
   ScrollView,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -102,17 +102,17 @@ export default function AddTransaction() {
     <SafeAreaView className="bg-background flex-1">
       {/* Header */}
       <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4 justify-between">
-        <TouchableOpacity
+        <Pressable
           onPress={() => router.back()}
-          className="flex-row items-center gap-2"
+          className="flex-row items-center gap-2 active:bg-muted"
         >
           <AntDesign name="left" size={24} color={COLORS.foreground} />
           <Text className="text-foreground font-semibold text-[15px]">Back</Text>
-        </TouchableOpacity>
+        </Pressable>
         {mode === "update" && (
-            <TouchableOpacity onPress={handleDelete} className="p-2">
+            <Pressable onPress={handleDelete} className="p-2 active:bg-muted">
             <Feather name="trash-2" size={20} color={COLORS.destructive} />
-            </TouchableOpacity>
+            </Pressable>
         )}
       </View>
 
@@ -204,14 +204,14 @@ export default function AddTransaction() {
           )}
 
           <View className="w-full mt-10 pb-4" style={{ zIndex: 1 }}>
-            <TouchableOpacity
+            <Pressable
               className="w-full py-4 border border-foreground items-center active:bg-muted"
               onPress={mode === "insert" ? handleInsert : handleUpdate}
             >
               <Text className="text-foreground text-[15px] text-center font-bold tracking-widest uppercase">
                 {mode === "insert" ? "SAVE" : "UPDATE"}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

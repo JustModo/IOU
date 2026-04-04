@@ -1,5 +1,5 @@
 import React from "react";
-import { Linking, Modal, Text, TouchableOpacity, View } from "react-native";
+import { Linking, Modal, Text, Pressable, View } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import { appAlert } from "@/services/alertService";
 import { COLORS } from "@/constants";
@@ -24,14 +24,14 @@ export default function UpiQrModal({ visible, name, upiId, onClose }: UpiQrModal
           </View>
           <Text className="text-muted-foreground text-[15px] mb-8">{upiId}</Text>
           <View className="flex-row gap-3 w-full">
-            <TouchableOpacity
-              className="flex-1 py-3 border border-input items-center"
+            <Pressable
+              className="flex-1 py-3 border border-input items-center active:bg-muted"
               onPress={onClose}
             >
               <Text className="text-foreground font-medium text-[15px]">Close</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 py-3 bg-foreground items-center"
+            </Pressable>
+            <Pressable
+              className="flex-1 py-3 bg-foreground items-center active:bg-muted"
               onPress={() => {
                 Linking.openURL(upiUrl).catch(() =>
                   appAlert("Error", "No UPI app found on this device")
@@ -39,7 +39,7 @@ export default function UpiQrModal({ visible, name, upiId, onClose }: UpiQrModal
               }}
             >
               <Text className="text-background font-medium text-[15px]">Pay Now</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </View>

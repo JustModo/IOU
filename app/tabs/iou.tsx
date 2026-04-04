@@ -1,7 +1,7 @@
 import TitleBar from "@/components/TitleBar";
 import { useDB } from "@/context/DBContext";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, TouchableOpacity } from "react-native";
+import { ScrollView, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import UserTab from "@/components/UserTab";
 import { User } from "@/types/user";
@@ -28,17 +28,17 @@ export default function IOU() {
         setSearchText={setSearchText}
         title="IOU"
       >
-        <TouchableOpacity
+        <Pressable
           onPress={() =>
             router.push({
               pathname: "/stack/user/userform",
               params: { mode: "insert" },
             })
           }
-          className="ml-6"
+          className="ml-6 active:bg-muted"
         >
-          <AntDesign name="adduser" size={24} color={COLORS.foreground} />
-        </TouchableOpacity>
+          <AntDesign name="user-add" size={24} color={COLORS.foreground} />
+        </Pressable>
       </TitleBar>
 
       <ScrollView

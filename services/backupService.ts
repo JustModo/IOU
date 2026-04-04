@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { usersTable, iouTransactions } from "@/db/schema";
-import * as FileSystem from "expo-file-system";
+import { File, Directory, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { Platform } from "react-native";
@@ -44,29 +44,25 @@ export async function exportBackup(): Promise<void> {
   const datePart = new Date().toISOString().split("T")[0];
 
   if (Platform.OS === "android") {
-    const permissions =
-      await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-
-    if (permissions.granted) {
-      const uri = await FileSystem.StorageAccessFramework.createFileAsync(
-        permissions.directoryUri,
+    try {
+      const selectedDirectory = await Directory.pickDirectoryAsync();
+      
+      const file = selectedDirectory.createFile(
         `iou_backup_v${APP_VERSION}_${datePart}.${BACKUP_EXTENSION}`,
         "application/octet-stream"
       );
-
-      await FileSystem.writeAsStringAsync(uri, jsonString, {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
+      
+      file.write(jsonString, { encoding: "utf8" });
       appAlert("Success", "Backup saved successfully!");
+    } catch {
+      // User canceled or failed to pick directory
     }
   } else {
-    const fileUri =
-      FileSystem.documentDirectory +
-      `iou_backup_v${APP_VERSION}_${datePart}.${BACKUP_EXTENSION}`;
-    await FileSystem.writeAsStringAsync(fileUri, jsonString);
+    const file = new File(Paths.document, `iou_backup_v${APP_VERSION}_${datePart}.${BACKUP_EXTENSION}`);
+    file.write(jsonString, { encoding: "utf8" });
 
     if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(fileUri);
+      await Sharing.shareAsync(file.uri);
     } else {
       appAlert("Error", "Sharing is not available on this device");
     }
@@ -82,7 +78,7 @@ export async function parseBackupFile(): Promise<BackupImportPayload | null> {
   if (result.canceled) return null;
 
   const fileUri = result.assets[0].uri;
-  const fileContent = await FileSystem.readAsStringAsync(fileUri);
+  const fileContent = await new File(fileUri).text();
 
   let rawData: any;
   try {

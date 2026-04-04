@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { checkForUpdates } from "@/services/updateService";
 import { COLORS } from "@/constants";
 
 export default function Layout() {
+  const insets = useSafeAreaInsets();
+
   useEffect(() => {
     checkForUpdates(true);
   }, []);
@@ -18,9 +21,9 @@ export default function Layout() {
           borderTopColor: COLORS.border,
           borderTopWidth: 1,
           borderColor: COLORS.border,
-          height: 60,
+          height: 56 + Math.max(insets.bottom, 8),
           paddingTop: 6,
-          paddingBottom: 6,
+          paddingBottom: Math.max(insets.bottom, 8),
           elevation: 0,
           shadowOpacity: 0,
         },

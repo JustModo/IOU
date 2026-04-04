@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import {
   AntDesign,
   Feather,
@@ -10,10 +10,6 @@ import {
 } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import TransactionTab from "@/components/TransactionTab";
-import {
-  GestureHandlerRootView,
-  ScrollView,
-} from "react-native-gesture-handler";
 import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";
@@ -86,29 +82,34 @@ export default function UserScreen() {
     <SafeAreaView className="bg-background flex-1">
       {/* Header */}
       <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4 justify-between">
-        <TouchableOpacity
+        <Pressable
           onPress={() => router.back()}
           className="flex-row items-center gap-2"
+          style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
         >
           <AntDesign name="left" size={24} color={COLORS.foreground} />
           <Text className="text-foreground font-semibold text-lg">Back</Text>
-        </TouchableOpacity>
+        </Pressable>
         <View className="flex-row items-center gap-4">
           {hasUpiId && (
-            <TouchableOpacity onPress={() => setQrVisible(true)}>
+            <Pressable
+              onPress={() => setQrVisible(true)}
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
               <MaterialIcons name="qr-code" size={22} color={COLORS.foreground} />
-            </TouchableOpacity>
+            </Pressable>
           )}
-          <TouchableOpacity
+          <Pressable
             onPress={() =>
               router.push({
                 pathname: "/stack/user/userform",
                 params: { mode: "update", user: JSON.stringify(data) },
               })
             }
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
           >
             <Feather name="edit-2" size={22} color={COLORS.foreground} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
@@ -146,34 +147,32 @@ export default function UserScreen() {
       </View>
 
       {/* Scrollable Content */}
-      <GestureHandlerRootView className="flex-1">
-        <ScrollView className="flex-1">
-          {isLoading ? (
-            <Text className="text-foreground text-center py-4">
-              Loading transactions...
-            </Text>
-          ) : transactions && transactions.length > 0 ? (
-            [...transactions]
-              .reverse()
-              .map((transaction) => (
-                <TransactionTab
-                  key={transaction.id}
-                  transaction={transaction}
-                />
-              ))
-          ) : (
-            <Text className="text-muted-foreground text-center py-4">
-              No transactions found
-            </Text>
-          )}
-        </ScrollView>
-      </GestureHandlerRootView>
+      <ScrollView className="flex-1">
+        {isLoading ? (
+          <Text className="text-foreground text-center py-4">
+            Loading transactions...
+          </Text>
+        ) : transactions && transactions.length > 0 ? (
+          [...transactions]
+            .reverse()
+            .map((transaction) => (
+              <TransactionTab
+                key={transaction.id}
+                transaction={transaction}
+              />
+            ))
+        ) : (
+          <Text className="text-muted-foreground text-center py-4">
+            No transactions found
+          </Text>
+        )}
+      </ScrollView>
 
       {/* Bottom Button Section */}
       <View className="border-t border-border bg-background px-2 pb-2">
         <View className="flex-row h-16 border-y border-border">
-          <TouchableOpacity
-            className="flex-1 h-full justify-center px-2 active:bg-muted"
+          <Pressable
+            className="flex-1 h-full justify-center px-2"
             onPress={() =>
               router.push({
                 pathname: `/stack/transaction/transactionform`,
@@ -184,23 +183,29 @@ export default function UserScreen() {
                 },
               })
             }
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? COLORS.muted : "transparent",
+            })}
           >
             <Text className="text-center text-sm font-semibold" style={{ color: COLORS.success }}>
               {actionLabels.leftTitle}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="w-20 h-16 border-x border-border bg-muted justify-center items-center active:bg-accent"
+          </Pressable>
+          <Pressable
+            className="w-20 h-16 border-x border-border bg-muted justify-center items-center"
             onPress={() => setRepayMode((prev) => !prev)}
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? COLORS.accent : COLORS.muted,
+            })}
           >
             <MaterialCommunityIcons
               name={repayMode ? "swap-horizontal" : "swap-vertical"}
               size={20}
               color={COLORS.foreground}
             />
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="flex-1 h-full justify-center px-2 active:bg-muted"
+          </Pressable>
+          <Pressable
+            className="flex-1 h-full justify-center px-2"
             onPress={() =>
               router.push({
                 pathname: `/stack/transaction/transactionform`,
@@ -211,11 +216,14 @@ export default function UserScreen() {
                 },
               })
             }
+            style={({ pressed }) => ({
+              backgroundColor: pressed ? COLORS.muted : "transparent",
+            })}
           >
             <Text className="text-center text-sm font-semibold" style={{ color: COLORS.destructive }}>
               {actionLabels.rightTitle}
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </View>
 
