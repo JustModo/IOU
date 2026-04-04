@@ -1,4 +1,6 @@
-import { triggerDebtReminderNow } from "@/services/notificationService";
+import {
+  triggerDebtReminderNow,
+} from "@/services/notificationService";
 import { User } from "@/types/user";
 
 export type DevScriptAlert = {

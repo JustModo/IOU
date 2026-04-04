@@ -2,6 +2,7 @@ import React from "react";
 import { Stack } from "expo-router";
 import * as SystemUI from "expo-system-ui";
 import "../global.css";
+import "@/services/notifeeEvents";
 import { DBProvider } from "@/context/DBContext";
 import { COLORS } from "@/constants";
 

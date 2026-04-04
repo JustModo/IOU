@@ -3,6 +3,7 @@ import * as Notifications from "expo-notifications";
 import notifee, {
   AndroidStyle,
   AuthorizationStatus,
+  AndroidNotificationSetting,
   TriggerType,
   type TimestampTrigger,
 } from "@notifee/react-native";
@@ -25,6 +26,11 @@ export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = {
   enabled: false,
   intervalHours: 72,
   scheduleAheadCount: 18,
+};
+
+export type ReminderEnablementCheckResult = {
+  permissionGranted: boolean;
+  needsExactAlarmSettings: boolean;
 };
 
 type ScheduledReminderState = {
@@ -222,34 +228,39 @@ async function scheduleReminderNotification(
       android: {
         channelId: REMINDER_CHANNEL_ID,
         smallIcon: "notification_icon",
+        largeIcon: imageUri ?? APP_ICON_URI,
+        circularLargeIcon: true,
+        autoCancel: true,
+        onlyAlertOnce: false,
+        timestamp: messageTimestamp,
+        showTimestamp: true,
         pressAction: { id: "default" },
         style: {
-          type: AndroidStyle.MESSAGING,
-          person: {
-            id: "self",
-            name: "You",
-          },
-          messages: [
-            {
-              text: message.description,
-              timestamp: messageTimestamp,
-              person: {
-                id: String(candidate.id),
-                name: message.caption,
-                ...(imageUri ? { icon: imageUri } : {}),
-              },
-            },
-          ],
+          type: AndroidStyle.BIGTEXT,
+          text: message.description,
         },
       },
     };
 
     if (typeof dateMs === "number") {
-      const trigger: TimestampTrigger = {
+      const exactTrigger: TimestampTrigger = {
         type: TriggerType.TIMESTAMP,
         timestamp: dateMs,
+        alarmManager: true,
       };
-      await notifee.createTriggerNotification(androidNotification, trigger);
+
+      try {
+        await notifee.createTriggerNotification(androidNotification, exactTrigger);
+      } catch (error) {
+        console.warn("Exact alarm scheduling failed, falling back to standard trigger", error);
+
+        const fallbackTrigger: TimestampTrigger = {
+          type: TriggerType.TIMESTAMP,
+          timestamp: dateMs,
+        };
+        await notifee.createTriggerNotification(androidNotification, fallbackTrigger);
+      }
+
       return id;
     }
 
@@ -368,6 +379,36 @@ export async function updateReminderSettings(
   const merged = await saveReminderSettings(partial);
   await refreshReminderSchedule(users);
   return merged;
+}
+
+export async function requestReminderPermissionAndCheckExactAlarm(): Promise<ReminderEnablementCheckResult> {
+  const permissionGranted = await ensureNotificationPermissions();
+
+  if (!permissionGranted) {
+    return {
+      permissionGranted: false,
+      needsExactAlarmSettings: false,
+    };
+  }
+
+  if (Platform.OS !== "android") {
+    return {
+      permissionGranted: true,
+      needsExactAlarmSettings: false,
+    };
+  }
+
+  const settings = await notifee.getNotificationSettings();
+
+  return {
+    permissionGranted: true,
+    needsExactAlarmSettings: settings.android.alarm === AndroidNotificationSetting.DISABLED,
+  };
+}
+
+export async function openReminderExactAlarmSettings(): Promise<void> {
+  if (Platform.OS !== "android") return;
+  await notifee.openAlarmPermissionSettings();
 }
 
 export async function bootstrapReminderEngine(users: User[]): Promise<void> {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, View, Text, TouchableOpacity, SafeAreaView, ScrollView, Image, Linking } from "react-native";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useDB } from "@/context/DBContext";
 import TitleBar from "@/components/TitleBar";
 import ConfirmModal from "@/components/ConfirmModal";
@@ -8,11 +9,13 @@ import * as backupService from "@/services/backupService";
 import {
   DEFAULT_REMINDER_SETTINGS,
   getReminderSettings,
+  openReminderExactAlarmSettings,
   refreshReminderSchedule,
+  requestReminderPermissionAndCheckExactAlarm,
   updateReminderSettings,
 } from "@/services/notificationService";
 import { ReminderSettings } from "@/types/reminder";
-import { APP_VERSION, DEVELOPER_NAME, GITHUB_RELEASES_URL, GITHUB_REPO_NAME } from "@/constants";
+import { APP_VERSION, DEVELOPER_NAME, GITHUB_URL, GITHUB_REPO_NAME } from "@/constants";
 import { appAlert } from "@/services/alertService";
 import { checkForUpdates } from "@/services/updateService";
 import { COLORS } from "@/constants";
@@ -62,6 +65,7 @@ function formatIntervalHoursHuman(intervalHours: number): string {
 }
 
 export default function More() {
+  const router = useRouter();
   const { users, fetchData } = useDB();
   const [loading, setLoading] = useState(false);
   const [reminderBusy, setReminderBusy] = useState(false);
@@ -123,6 +127,54 @@ export default function More() {
     }
   };
 
+  const handleToggleDebtReminders = async () => {
+    if (reminderSettings.enabled) {
+      await applyReminderSettings({ enabled: false });
+      return;
+    }
+
+    setReminderBusy(true);
+    try {
+      const checks = await requestReminderPermissionAndCheckExactAlarm();
+
+      if (!checks.permissionGranted) {
+        appAlert(
+          "Permission required",
+          "Allow notifications to enable debt reminders."
+        );
+        const reloaded = await getReminderSettings();
+        setReminderSettings(reloaded);
+        return;
+      }
+
+      if (checks.needsExactAlarmSettings) {
+        appAlert(
+          "Enable exact alarms",
+          "For reliable reminder timing on Android, allow exact alarms in system settings.",
+          [
+            { text: "Not now", style: "cancel" },
+            {
+              text: "Open settings",
+              onPress: () => {
+                void openReminderExactAlarmSettings();
+              },
+            },
+          ]
+        );
+      }
+
+      const saved = await updateReminderSettings({ enabled: true }, users);
+      setReminderSettings(saved);
+    } catch (error) {
+      console.error(error);
+      appAlert("Error", "Failed to enable reminders");
+      const reloaded = await getReminderSettings();
+      setReminderSettings(reloaded);
+    } finally {
+      setReminderBusy(false);
+    }
+  };
+
   const handleOpenIntervalModal = () => {
     setIntervalDraft(intervalPartsFromHours(reminderSettings.intervalHours));
     setIntervalModalVisible(true);
@@ -142,6 +194,10 @@ export default function More() {
   const handleSaveInterval = async () => {
     await applyReminderSettings({ intervalHours: intervalHoursFromParts(intervalDraft) });
     setIntervalModalVisible(false);
+  };
+
+  const handleOpenAndroidReminderSetup = () => {
+    router.push("/stack/reminder/android-setup");
   };
 
   const handleExport = async () => {
@@ -241,7 +297,7 @@ export default function More() {
         <View className="border-t border-b border-border">
           <TouchableOpacity
             className="flex-row items-center p-3 active:bg-muted"
-            onPress={() => applyReminderSettings({ enabled: !reminderSettings.enabled })}
+            onPress={handleToggleDebtReminders}
             disabled={reminderBusy}
           >
             <Feather
@@ -280,6 +336,23 @@ export default function More() {
                   <Text className="text-foreground text-[15px] font-medium">Reminder Interval</Text>
                   <Text className="text-subtle text-xs mt-0.5">
                     Every {formatIntervalHoursHuman(reminderSettings.intervalHours)}
+                  </Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
+              </TouchableOpacity>
+
+              <View className="h-[1px] bg-border ml-11" />
+
+              <TouchableOpacity
+                className="flex-row items-center p-3 active:bg-muted"
+                onPress={handleOpenAndroidReminderSetup}
+                disabled={reminderBusy}
+              >
+                <Feather name="settings" size={20} color={COLORS.foreground} className="mr-2 ml-1" />
+                <View className="flex-1 ml-2">
+                  <Text className="text-foreground text-[15px] font-medium">Fix My Reminder D:</Text>
+                  <Text className="text-subtle text-xs mt-0.5">
+                    Check battery and exact alarm settings
                   </Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={COLORS.subtle} />
@@ -367,7 +440,7 @@ export default function More() {
           </View>
           <TouchableOpacity 
             className="flex-row justify-between items-center p-3 active:bg-muted"
-            onPress={() => Linking.openURL(GITHUB_RELEASES_URL)}
+            onPress={() => Linking.openURL(GITHUB_URL)}
           >
             <Text className="text-foreground text-[15px] ml-1">GitHub</Text>
             <View className="flex-row items-center">
@@ -390,7 +463,11 @@ export default function More() {
 
         {(loading || reminderBusy || devScriptBusy) && (
           <Text className="text-center text-muted-foreground mt-6 text-sm">
-            {loading ? "Processing..." : reminderBusy ? "Updating reminders..." : "Running dev script..."}
+            {loading
+              ? "Processing..."
+              : reminderBusy
+                ? "Updating reminders..."
+                : "Running dev script..."}
           </Text>
         )}
       </ScrollView>
@@ -479,6 +556,7 @@ export default function More() {
           </View>
         </View>
       </Modal>
+
     </SafeAreaView>
   );
 }

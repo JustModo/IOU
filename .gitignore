@@ -41,4 +41,5 @@ app-example
 drizzle/*.sqlite
 drizzle/*.sqlite-journal
 
-builds
+/builds
+.vscode
