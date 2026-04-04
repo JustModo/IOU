@@ -84,7 +84,6 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "flex-start",
-              borderBottomWidth: 1,
               borderBottomColor: COLORS.border,
               backgroundColor: COLORS.background,
             },

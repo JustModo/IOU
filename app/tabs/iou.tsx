@@ -43,6 +43,7 @@ export default function IOU() {
 
       <ScrollView
         className="flex-1"
+        showsVerticalScrollIndicator={false}
       >
         {filteredUsers.length > 0 ? (
           filteredUsers.map((user) => <UserTab key={user.id} user={user} />)

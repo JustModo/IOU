@@ -4,5 +4,8 @@ module.exports = {
   parserOptions: {
     warnOnUnsupportedTypeScriptVersion: false,
   },
+  rules: {
+    'expo/use-dom-exports': 'off',
+  },
   ignorePatterns: ['/dist/*'],
 };

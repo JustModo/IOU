@@ -43,3 +43,6 @@ drizzle/*.sqlite-journal
 
 /builds
 .vscode
+
+/android
+/ios

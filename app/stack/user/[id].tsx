@@ -8,7 +8,7 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import TransactionTab from "@/components/TransactionTab";
 import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
@@ -19,6 +19,7 @@ import { COLORS } from "@/constants";
 
 export default function UserScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams();
   const { users, fetchTransactionsByID } = useDB();
 
@@ -79,7 +80,7 @@ export default function UserScreen() {
       };
 
   return (
-    <SafeAreaView className="bg-background flex-1">
+    <SafeAreaView className="bg-background flex-1" edges={["top"]}>
       {/* Header */}
       <View className="w-full h-16 bg-background border-b border-border flex-row items-center px-4 justify-between">
         <Pressable
@@ -169,10 +170,21 @@ export default function UserScreen() {
       </ScrollView>
 
       {/* Bottom Button Section */}
-      <View className="border-t border-border bg-background px-2 pb-2">
-        <View className="flex-row h-16 border-y border-border">
+      <View
+        style={{
+          backgroundColor: COLORS.background,
+          borderTopColor: COLORS.border,
+          borderTopWidth: 1,
+          borderColor: COLORS.border,
+          height: 56 + Math.max(insets.bottom, 8),
+          paddingBottom: Math.max(insets.bottom, 8),
+          elevation: 0,
+          shadowOpacity: 0,
+        }}
+      >
+        <View className="flex-row flex-1">
           <Pressable
-            className="flex-1 h-full justify-center px-2"
+            className="flex-1 h-full justify-center py-0.5"
             onPress={() =>
               router.push({
                 pathname: `/stack/transaction/transactionform`,
@@ -192,7 +204,7 @@ export default function UserScreen() {
             </Text>
           </Pressable>
           <Pressable
-            className="w-20 h-16 border-x border-border bg-muted justify-center items-center"
+            className="w-20 h-full border-x border-border bg-muted justify-center items-center"
             onPress={() => setRepayMode((prev) => !prev)}
             style={({ pressed }) => ({
               backgroundColor: pressed ? COLORS.accent : COLORS.muted,
@@ -205,7 +217,7 @@ export default function UserScreen() {
             />
           </Pressable>
           <Pressable
-            className="flex-1 h-full justify-center px-2"
+            className="flex-1 h-full justify-center py-0.5"
             onPress={() =>
               router.push({
                 pathname: `/stack/transaction/transactionform`,
