@@ -24,9 +24,14 @@ export function migrateToLatest(rawData: any): BackupData {
   }
 
   if (version !== APP_VERSION) {
-    console.warn(
-      `Backup migrated to ${version}, but current app is ${APP_VERSION}. Missing migrations may cause issues.`
-    );
+    const backupMajorMinor = version.split(".").slice(0, 2).join(".");
+    const appMajorMinor = APP_VERSION.split(".").slice(0, 2).join(".");
+
+    if (backupMajorMinor !== appMajorMinor) {
+      console.warn(
+        `Backup migrated to ${version}, but current app is ${APP_VERSION}. Missing migrations may cause issues.`
+      );
+    }
   }
 
   return data as BackupData;
