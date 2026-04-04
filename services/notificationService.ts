@@ -201,7 +201,7 @@ function normalizeImageUri(uri?: string | null): string | undefined {
 }
 
 function resolveNotificationAvatarUri(uri?: string | null): string | undefined {
-  return normalizeImageUri(uri) ?? normalizeImageUri(APP_ICON_URI);
+  return normalizeImageUri(uri);
 }
 
 async function scheduleReminderNotification(
@@ -228,12 +228,12 @@ async function scheduleReminderNotification(
       android: {
         channelId: REMINDER_CHANNEL_ID,
         smallIcon: "notification_icon",
-        largeIcon: imageUri ?? APP_ICON_URI,
-        circularLargeIcon: true,
+        ...(imageUri ? { largeIcon: imageUri, circularLargeIcon: true } : {}),
         autoCancel: true,
         onlyAlertOnce: false,
         timestamp: messageTimestamp,
         showTimestamp: true,
+        color: "#000000",
         pressAction: { id: "default" },
         style: {
           type: AndroidStyle.BIGTEXT,
@@ -286,9 +286,9 @@ async function scheduleReminderNotification(
     trigger:
       typeof dateMs === "number"
         ? {
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: new Date(dateMs),
-          }
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: new Date(dateMs),
+        }
         : null,
   });
 }

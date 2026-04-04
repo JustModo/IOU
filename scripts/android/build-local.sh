@@ -16,10 +16,7 @@ find "$PROJECT_DIR" -mindepth 1 -maxdepth 1 ! -name node_modules ! -name .gradle
 
 tar -C "$SRC_DIR" \
   --exclude=node_modules \
-  --exclude=android/.gradle \
-  --exclude=android/build \
-  --exclude=android/app/build \
-  --exclude=android/local.properties \
+  --exclude=android \
   --exclude=ios \
   --exclude=builds \
   --exclude=.git \
@@ -46,12 +43,8 @@ OUTPUT_BASE="${APP_NAME}_v${APP_VERSION}"
 echo "App: $APP_NAME"
 echo "Version: $APP_VERSION"
 
-if [ -d "android" ]; then
-  echo "== Using committed Android project (bare workflow) =="
-else
-  echo "== Android folder missing, running prebuild fallback =="
-  CI=1 npx expo prebuild --platform android
-fi
+echo "== Generating native Android project =="
+CI=1 npm run android:prebuild
 
 cd android
 
