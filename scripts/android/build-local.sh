@@ -27,7 +27,8 @@ cd "$PROJECT_DIR"
 
 echo "== Installing dependencies (deterministic) =="
 # Keep devDependencies for Metro/Babel tooling used in release bundling.
-npm ci --no-audit --prefer-offline --include=dev
+# npm ci --no-audit --prefer-offline --include=dev
+pnpm install --frozen-lockfile
 
 echo "== Resolving app config =="
 

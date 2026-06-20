@@ -28,6 +28,6 @@ RUN sdkmanager \
     "build-tools;34.0.0"
 
 # Expo tooling
-RUN npm install -g eas-cli
+RUN npm install -g eas-cli pnpm
 
 WORKDIR /app
