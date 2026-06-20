@@ -73,7 +73,7 @@ async function readJsonFile<T>(fileUri: string, fallback: T): Promise<T> {
 
 async function writeJsonFile(fileUri: string, value: unknown): Promise<void> {
   const file = new File(fileUri);
-  file.write(JSON.stringify(value));
+  await file.write(JSON.stringify(value));
 }
 
 function normalizeSettings(raw?: Partial<ReminderSettings>): ReminderSettings {
@@ -297,20 +297,18 @@ async function scheduleReminderNotification(
 }
 
 async function clearScheduledReminders(): Promise<void> {
-  const state = await readJsonFile<ScheduledReminderState>(REMINDER_IDS_FILE, { ids: [] });
-  await Promise.all(
-    state.ids.map(async (id) => {
-      try {
-        if (Platform.OS === "android") {
-          await notifee.cancelTriggerNotification(id);
-          await notifee.cancelNotification(id);
-        }
-        await Notifications.cancelScheduledNotificationAsync(id);
-      } catch {
-        // Ignore stale ids; they can happen after app reinstalls or manual clears.
+  try {
+    if (Platform.OS === "android") {
+      const triggerIds = await notifee.getTriggerNotificationIds();
+      if (triggerIds.length > 0) {
+        await notifee.cancelTriggerNotifications(triggerIds);
       }
-    })
-  );
+      await notifee.cancelAllNotifications();
+    }
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  } catch {
+    // Ignore global clear errors
+  }
   await writeJsonFile(REMINDER_IDS_FILE, { ids: [] } satisfies ScheduledReminderState);
 }
 
