@@ -137,7 +137,7 @@ export default function AddTransaction() {
             <Text className="text-foreground font-light text-4xl mr-2 mb-1">₹</Text>
             <TextInput
               ref={amountInputRef}
-              className="text-foreground font-bold text-6xl bg-transparent min-w-[50%]"
+              className="text-foreground font-bold text-6xl bg-transparent min-w-[50%] text-center"
               style={{ paddingVertical: 0, margin: 0, includeFontPadding: false }}
               placeholderTextColor={COLORS.input}
               keyboardType="decimal-pad"
