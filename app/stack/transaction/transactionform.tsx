@@ -28,7 +28,7 @@ export default function AddTransaction() {
     transaction?: string;
   };
 
-  const amountRef = useRef("");
+  const [amountText, setAmountText] = useState("");
   const [note, setNote] = useState("");
   const [selectedType, setSelectedType] = useState<TransactionType>("repay");
   const [open, setOpen] = useState(false);
@@ -44,7 +44,7 @@ export default function AddTransaction() {
   useEffect(() => {
     if (mode === "update" && transaction) {
       const parsedTransaction: IOUTransaction = JSON.parse(transaction);
-      amountRef.current = Math.abs(parsedTransaction.amount).toString();
+      setAmountText(Math.abs(parsedTransaction.amount).toString());
       setTransactionId(parsedTransaction.id);
       setNote(parsedTransaction.note);
       setSelectedType(parsedTransaction.type as TransactionType);
@@ -61,7 +61,7 @@ export default function AddTransaction() {
       return;
     }
     const parsedID = parseInt(id, 10);
-    const parsedAmount = amountRef.current.trim() === "" ? 0 : parseFloat(amountRef.current);
+    const parsedAmount = amountText.trim() === "" ? 0 : parseFloat(amountText);
     const updatedNote = selectedType === "repay" || selectedType === "repaid" ? "Repaid" : note;
     const res = await insertIouTransaction(
       parsedID,
@@ -76,7 +76,7 @@ export default function AddTransaction() {
     if (!id || Array.isArray(id)) {
       return;
     }
-    const parsedAmount = amountRef.current.trim() === "" ? 0 : parseFloat(amountRef.current);
+    const parsedAmount = amountText.trim() === "" ? 0 : parseFloat(amountText);
     const normalAmount = normalizeTransactionAmount(parsedAmount, selectedType);
     const updatedNote = selectedType === "repay" || selectedType === "repaid" ? "Repaid" : note;
     const res = await updateIouTransaction(
@@ -133,19 +133,35 @@ export default function AddTransaction() {
             {setting.title}
           </Text>
 
-          <View className="w-full flex-row items-center justify-center border-b border-border pb-6 mb-6">
-            <Text className="text-foreground text-6xl">₹</Text>
+          <View className="w-full h-[100px] flex-row items-center justify-center border-b border-border pb-6 mb-6">
+            <Text className="text-foreground font-light text-4xl mr-2 mb-1">₹</Text>
             <TextInput
               ref={amountInputRef}
-              className="text-foreground text-center text-6xl bg-transparent min-w-[120px]"
+              className="text-foreground font-bold text-6xl bg-transparent min-w-[50%]"
+              style={{ paddingVertical: 0, margin: 0, includeFontPadding: false }}
               placeholderTextColor={COLORS.input}
               keyboardType="decimal-pad"
               placeholder="0"
-              maxLength={6}
+              maxLength={amountText.includes(".") ? amountText.indexOf(".") + 3 : 10}
               autoFocus
-              defaultValue={amountRef.current}
+              value={amountText}
               onChangeText={(text) => {
-                amountRef.current = text;
+                // Remove anything that is not a number or dot
+                let cleaned = text.replace(/[^0-9.]/g, "");
+                
+                // Prevent multiple dots
+                const parts = cleaned.split(".");
+                if (parts.length > 2) {
+                  cleaned = parts[0] + "." + parts.slice(1).join("");
+                }
+                
+                // Limit to 2 decimal places
+                const newParts = cleaned.split(".");
+                if (newParts[1] && newParts[1].length > 2) {
+                  cleaned = `${newParts[0]}.${newParts[1].slice(0, 2)}`;
+                }
+                
+                setAmountText(cleaned);
               }}
             />
           </View>
