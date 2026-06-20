@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "IOU-test",
-    "slug": "iou-test",
+    "name": "IOU",
+    "slug": "iou",
     "version": "1.3.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -13,7 +13,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.justmodo.ioutest",
+      "package": "com.justmodo.iou",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#000000"
