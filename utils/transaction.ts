@@ -11,5 +11,6 @@ export const TRANSACTION_TYPE_MAP: Record<
 };
 
 export function normalizeTransactionAmount(amount: number, type: TransactionType): number {
-  return amount * TRANSACTION_TYPE_MAP[type].mul;
+  const result = amount * TRANSACTION_TYPE_MAP[type].mul;
+  return Number(result.toFixed(2));
 }

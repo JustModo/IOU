@@ -8,14 +8,14 @@ import { Animated, Easing, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function formatCurrency(amount: number): string {
-  return `₹${Number.isFinite(amount) ? amount : 0}`;
+  return `₹${Number.isFinite(amount) ? amount.toFixed(2) : "0.00"}`;
 }
 
 function formatSignedCurrency(amount: number): string {
-  if (!Number.isFinite(amount)) return "₹0";
-  if (amount > 0) return `+₹${amount}`;
-  if (amount < 0) return `-₹${Math.abs(amount)}`;
-  return "₹0";
+  if (!Number.isFinite(amount)) return "₹0.00";
+  if (amount > 0) return `+₹${amount.toFixed(2)}`;
+  if (amount < 0) return `-₹${Math.abs(amount).toFixed(2)}`;
+  return "₹0.00";
 }
 
 function firstName(name: string): string {

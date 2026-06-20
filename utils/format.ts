@@ -18,7 +18,7 @@ export function formatDateToDisplay(isoString: string): string {
 export function formatAmount(amount: number): { sign: string; display: string } {
   const status = getAmountStatus(amount);
   const sign = status === "positive" ? "+" : status === "negative" ? "-" : "";
-  return { sign, display: `${sign} ${Math.abs(amount)}` };
+  return { sign, display: `${sign} ${Math.abs(amount).toFixed(2)}` };
 }
 
 export function getAmountStatus(amount: number): Status {

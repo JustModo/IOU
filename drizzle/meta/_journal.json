@@ -50,6 +50,13 @@
       "when": 1774120022192,
       "tag": "0006_yellow_sasquatch",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1782290000000,
+      "tag": "0007_round_existing_amounts",
+      "breakpoints": true
     }
   ]
 }

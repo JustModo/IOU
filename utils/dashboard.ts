@@ -24,14 +24,14 @@ export type TopBalancePoint = {
 
 export function parseUserAmount(amount: unknown): number {
   if (typeof amount === "number") {
-    return Number.isFinite(amount) ? amount : 0;
+    return Number.isFinite(amount) ? Number(amount.toFixed(2)) : 0;
   }
 
   if (typeof amount === "string") {
     const normalized = amount.replace(/,/g, "").trim();
     if (!normalized) return 0;
     const value = Number(normalized);
-    return Number.isFinite(value) ? value : 0;
+    return Number.isFinite(value) ? Number(value.toFixed(2)) : 0;
   }
 
   return 0;
