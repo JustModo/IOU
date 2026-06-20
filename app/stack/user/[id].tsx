@@ -71,8 +71,8 @@ export default function UserScreen() {
   const hasUpiId = Boolean(data.upi_id?.trim());
   const actionLabels = repayMode
     ? {
-        leftTitle: "Collect",
-        rightTitle: "Repay",
+        leftTitle: "Repay",
+        rightTitle: "Collect",
       }
     : {
         leftTitle: "Lend",
@@ -189,7 +189,7 @@ export default function UserScreen() {
               router.push({
                 pathname: `/stack/transaction/transactionform`,
                 params: {
-                  type: repayMode ? "repay" : "oweme",
+                  type: repayMode ? "repaid" : "oweme",
                   id: data.id,
                   mode: "insert",
                 },
@@ -222,7 +222,7 @@ export default function UserScreen() {
               router.push({
                 pathname: `/stack/transaction/transactionform`,
                 params: {
-                  type: repayMode ? "repaid" : "oweyou",
+                  type: repayMode ? "repay" : "oweyou",
                   id: data.id,
                   mode: "insert",
                 },

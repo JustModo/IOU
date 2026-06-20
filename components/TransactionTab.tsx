@@ -80,25 +80,26 @@ export default function TransactionTab({ transaction }: TransactionTabProps) {
             rowAnimatedStyle,
             {
               paddingVertical: 16,
-              paddingHorizontal: 20,
+              paddingHorizontal: 16,
               flexDirection: "row",
               justifyContent: "space-between",
-              alignItems: "flex-start",
+              alignItems: "center",
               borderBottomColor: COLORS.border,
+              borderBottomWidth: 1,
               backgroundColor: COLORS.background,
             },
           ]}
         >
-          <View className="max-w-[80%]">
-            <Text className="text-lg text-foreground">
-              {transaction.note !== "" ? transaction.note : "Note"}
+          <View className="max-w-[70%]">
+            <Text className="text-base text-foreground" numberOfLines={1}>
+              {transaction.note !== "" ? transaction.note : "No Note"}
             </Text>
-            <Text className="text-sm text-muted-foreground">
+            <Text className="text-xs text-muted-foreground mt-0.5">
               {formatDateToDisplay(transaction.date)}
             </Text>
           </View>
           <Text
-            className="font-light text-2xl"
+            className="text-lg"
             style={statusColor(status)}
           >
             {display}

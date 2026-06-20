@@ -13,8 +13,8 @@ function formatCurrency(amount: number): string {
 
 function formatSignedCurrency(amount: number): string {
   if (!Number.isFinite(amount)) return "₹0.00";
-  if (amount > 0) return `+₹${amount.toFixed(2)}`;
-  if (amount < 0) return `-₹${Math.abs(amount).toFixed(2)}`;
+  if (amount > 0) return `₹${amount.toFixed(2)}`;
+  if (amount < 0) return `₹${Math.abs(amount).toFixed(2)}`;
   return "₹0.00";
 }
 
