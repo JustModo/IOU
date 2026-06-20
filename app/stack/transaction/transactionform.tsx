@@ -218,18 +218,28 @@ export default function AddTransaction() {
               />
             </View>
           )}
-
-          <View className="w-full mt-10 pb-4" style={{ zIndex: 1 }}>
-            <Pressable
-              className="w-full py-4 border border-foreground items-center active:bg-muted"
-              onPress={mode === "insert" ? handleInsert : handleUpdate}
-            >
-              <Text className="text-foreground text-[15px] text-center font-bold tracking-widest uppercase">
-                {mode === "insert" ? "SAVE" : "UPDATE"}
-              </Text>
-            </Pressable>
-          </View>
         </ScrollView>
+
+        {/* Save Button */}
+        <View className="p-4 border-t border-border bg-background">
+          <Pressable
+            className="w-full p-4 bg-card rounded-lg active:bg-muted"
+            onPress={mode === "insert" ? handleInsert : handleUpdate}
+            disabled={amountText.trim() === "" || parseFloat(amountText) === 0}
+          >
+            <Text
+              className="text-foreground text-xl text-center font-semibold"
+              style={{
+                color:
+                  amountText.trim() !== "" && parseFloat(amountText) > 0
+                    ? COLORS.foreground
+                    : COLORS.mutedForeground,
+              }}
+            >
+              {mode === "insert" ? "Save" : "Update"}
+            </Text>
+          </Pressable>
+        </View>
       </KeyboardAvoidingView>
 
       <ConfirmModal

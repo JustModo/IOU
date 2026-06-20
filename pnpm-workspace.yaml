@@ -1,4 +1,4 @@
 allowBuilds:
   es5-ext: true
   esbuild: true
-  unrs-resolver: set this to true or false
+  unrs-resolver: true

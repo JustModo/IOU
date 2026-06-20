@@ -134,7 +134,7 @@ export default function AddUser() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "space-between" }}
+          className="flex-1"
           keyboardShouldPersistTaps="handled"
         >
           {/* Profile Section */}
@@ -192,8 +192,10 @@ export default function AddUser() {
               </Pressable>
             </View>
           </View>
+        </ScrollView>
 
-          {/* Save Button */}
+        {/* Save Button */}
+        <View className="p-4 border-t border-border bg-background">
           <Pressable
             className="w-full p-4 bg-card rounded-lg active:bg-muted"
             onPress={mode === "insert" ? handleInsert : handleUpdate}
@@ -206,7 +208,7 @@ export default function AddUser() {
               {mode === "insert" ? "Save" : "Update"}
             </Text>
           </Pressable>
-        </ScrollView>
+        </View>
       </KeyboardAvoidingView>
 
       <Modal visible={scannerVisible} animationType="slide">

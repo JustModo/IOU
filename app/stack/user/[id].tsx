@@ -10,6 +10,7 @@ import {
 } from "@expo/vector-icons";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import TransactionTab from "@/components/TransactionTab";
+import ShareStatementModal from "@/components/ShareStatementModal";
 import { useDB } from "@/context/DBContext";
 import { User } from "@/types/user";
 import { IOUTransaction } from "@/types/transaction";
@@ -30,6 +31,7 @@ export default function UserScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [repayMode, setRepayMode] = useState(false);
   const [qrVisible, setQrVisible] = useState(false);
+  const [shareVisible, setShareVisible] = useState(false);
 
   const userId = typeof id === "string" ? Number(id) : null;
 
@@ -92,6 +94,12 @@ export default function UserScreen() {
           <Text className="text-foreground font-semibold text-lg">Back</Text>
         </Pressable>
         <View className="flex-row items-center gap-4">
+          <Pressable
+            onPress={() => setShareVisible(true)}
+            style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+          >
+            <Feather name="share" size={22} color={COLORS.foreground} />
+          </Pressable>
           {hasUpiId && (
             <Pressable
               onPress={() => setQrVisible(true)}
@@ -245,6 +253,15 @@ export default function UserScreen() {
         upiId={data.upi_id || ""}
         onClose={() => setQrVisible(false)}
       />
+
+      {transactions && (
+        <ShareStatementModal
+          visible={shareVisible}
+          user={data}
+          transactions={transactions}
+          onClose={() => setShareVisible(false)}
+        />
+      )}
     </SafeAreaView>
   );
 }
