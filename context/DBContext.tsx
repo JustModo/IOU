@@ -4,6 +4,7 @@ import {
   useContext,
   Dispatch,
   SetStateAction,
+  useCallback,
   useState,
 } from "react";
 import { User } from "@/types/user";
@@ -47,17 +48,25 @@ export const DBProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>([]);
 
 
-  const fetchData = async (): Promise<User[]> => {
+  const fetchData = useCallback(async (): Promise<User[]> => {
     try {
       const fetched = await userSvc.getAllUsers();
       setUsers(fetched);
-      void refreshReminderSchedule(fetched);
+      await refreshReminderSchedule(fetched);
       return fetched;
     } catch (error) {
-      console.error("Error fetching data:", error);
-      return [];
+      console.error("Error fetching data, retrying once:", error);
+      try {
+        const fetched = await userSvc.getAllUsers();
+        setUsers(fetched);
+        await refreshReminderSchedule(fetched);
+        return fetched;
+      } catch (retryError) {
+        console.error("Error fetching data on retry:", retryError);
+        return [];
+      }
     }
-  };
+  }, []);
 
 
   const insertUser = async (

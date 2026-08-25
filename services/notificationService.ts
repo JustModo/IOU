@@ -359,7 +359,21 @@ export async function saveReminderSettings(
   return merged;
 }
 
+let refreshInFlight: Promise<void> | null = null;
+
 export async function refreshReminderSchedule(users: User[]): Promise<void> {
+  if (refreshInFlight) {
+    await refreshInFlight;
+  }
+  refreshInFlight = doRefreshReminderSchedule(users);
+  try {
+    await refreshInFlight;
+  } finally {
+    refreshInFlight = null;
+  }
+}
+
+async function doRefreshReminderSchedule(users: User[]): Promise<void> {
   const settings = await getReminderSettings();
   await ensureAndroidChannel();
   await clearScheduledReminders();

@@ -46,3 +46,5 @@ drizzle/*.sqlite-journal
 
 /android
 /ios
+
+.serena
